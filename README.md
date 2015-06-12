@@ -3,12 +3,12 @@ So, you want to create an application with htmengine?!
 
 This is a bare-bones, minimal example for building an application on the
 `htmengine` framework.  There are two important steps that must be done
-in order to _user_ htmengine: Configuration the application, and setup the
+in order to _use_ htmengine: Configure the application, and setup the
 database.  Once you have completed the following instructions, you will have
-a running htmengine application.  You may send data to the graphite-compatible
-custom metrics interface, or send data directly into the AMQP exchange, and
-receive real-time results from the model results exchange, or by polling the
-database.
+a running `htmengine` application.  You may send data to the
+graphite-compatible custom metrics interface, or send data directly into the
+AMQP exchange, and receive real-time results from the model results exchange,
+or by polling the database.
 
 ## Before you begin
 
