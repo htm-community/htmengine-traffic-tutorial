@@ -166,3 +166,21 @@ $ mysql -u root skeleton --execute="select uid, name, description, status from m
 | 4258abfc6de947609f821095471dd0a2 | cpu_percent | Custom metric cpu_percent |      1 |
 +----------------------------------+-------------+---------------------------+--------+
 ```
+
+Additionally, you can consume the anomaly results in near realtime with the
+included `consume_realtime_results.py` script.
+
+```
+$ python consume_realtime_results.py
+Handling 1 model result(s) for 4258abfc6de947609f821095471dd0a2 - cpu_percent
+4258abfc6de947609f821095471dd0a2 [{u'rowid': 749, u'rawAnomaly': 0.0, u'anomaly': 0.04456546299999997, u'ts': 1434174392.0, u'value': 8.0}]
+Handling 1 model result(s) for 4258abfc6de947609f821095471dd0a2 - cpu_percent
+4258abfc6de947609f821095471dd0a2 [{u'rowid': 750, u'rawAnomaly': 0.0, u'anomaly': 0.04456546299999997, u'ts': 1434174397.0, u'value': 9.6}]
+Handling 1 model result(s) for 4258abfc6de947609f821095471dd0a2 - cpu_percent
+4258abfc6de947609f821095471dd0a2 [{u'rowid': 751, u'rawAnomaly': 0.0, u'anomaly': 0.04456546299999997, u'ts': 1434174402.0, u'value': 7.3}]
+Handling 1 model result(s) for 4258abfc6de947609f821095471dd0a2 - cpu_percent
+4258abfc6de947609f821095471dd0a2 [{u'rowid': 752, u'rawAnomaly': 0.0, u'anomaly': 0.04456546299999997, u'ts': 1434174407.0, u'value': 8.1}]
+Handling 1 model result(s) for 4258abfc6de947609f821095471dd0a2 - cpu_percent
+4258abfc6de947609f821095471dd0a2 [{u'rowid': 753, u'rawAnomaly': 0.0, u'anomaly': 0.04456546299999997, u'ts': 1434174412.0, u'value': 7.0}]
+...
+```
