@@ -88,6 +88,10 @@ python repository/migrate.py
 
 ## 5. Start services with supervisor
 
+To install supervisord, run:
+
+    sudo easy_install supervisor
+
 Again, from the root of this project:
 
 ```
