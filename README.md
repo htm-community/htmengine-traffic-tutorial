@@ -135,3 +135,34 @@ Notice that only `uid`, `rowid`, `timestamp`, and `metric_value` are populated.
 The next step will be to explicitly create a model for the `cpu_percent` metric
 so that `raw_anomaly_score` and `anomaly_score` may be populated with anomaly
 scores.
+
+```
+python create_cpu_percent_model.py
+```
+
+Then, check the database again, and you should see anomaly scores:
+
+```
+$ mysql -u root skeleton --execute="select * from metric_data order by rowid desc limit 5"
++----------------------------------+-------+---------------------+--------------+-------------------+---------------+---------------+
+| uid                              | rowid | timestamp           | metric_value | raw_anomaly_score | anomaly_score | display_value |
++----------------------------------+-------+---------------------+--------------+-------------------+---------------+---------------+
+| 4258abfc6de947609f821095471dd0a2 |   344 | 2015-06-13 04:23:11 |         10.5 |             0.075 |   0.344578258 |          1000 |
+| 4258abfc6de947609f821095471dd0a2 |   343 | 2015-06-13 04:23:06 |          9.6 |              0.05 |   0.184060125 |          1000 |
+| 4258abfc6de947609f821095471dd0a2 |   342 | 2015-06-13 04:23:01 |          8.4 |              0.05 |    0.11506967 |          1000 |
+| 4258abfc6de947609f821095471dd0a2 |   341 | 2015-06-13 04:22:56 |          9.4 |              0.05 |   0.080756659 |          1000 |
+| 4258abfc6de947609f821095471dd0a2 |   340 | 2015-06-13 04:22:51 |          7.6 |                 0 |   0.044565463 |          1000 |
++----------------------------------+-------+---------------------+--------------+-------------------+---------------+---------------+
+```
+
+You can query the `metric` table to get status on the model.  You'll know
+everything is working when `status` is `1`:
+
+```
+$ mysql -u root skeleton --execute="select uid, name, description, status from metric where name = 'cpu_percent'"
++----------------------------------+-------------+---------------------------+--------+
+| uid                              | name        | description               | status |
++----------------------------------+-------------+---------------------------+--------+
+| 4258abfc6de947609f821095471dd0a2 | cpu_percent | Custom metric cpu_percent |      1 |
++----------------------------------+-------------+---------------------------+--------+
+```
