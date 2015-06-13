@@ -88,3 +88,15 @@ supervisord -c conf/supervisord.conf
 ```
 
 At this point, the core `htmengine` services are running.
+
+## Usage
+
+A sample `send_cpu.py` script is included demonstrating how to send data into
+`htmengine` for processing using the `message_bus_connector` API.
+
+```
+python send_cpu.py
+```
+
+`send_cpu.py` will run indefinitely, sending cpu percent samples every 5
+seconds into the custom metrics queue for processing by htmengine.
