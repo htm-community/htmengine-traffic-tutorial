@@ -112,3 +112,26 @@ background:
 ```
 nohup python send_cpu.py > send_cpu.stdout 2> send_cpu.stderr < /dev/null &
 ```
+
+If you look in the `metric_data` MySQL table, you should start to see new
+records come in.
+
+For example:
+
+```
+$ mysql -u root skeleton --execute="select * from metric_data order by rowid desc limit 5"
++----------------------------------+-------+---------------------+--------------+-------------------+---------------+---------------+
+| uid                              | rowid | timestamp           | metric_value | raw_anomaly_score | anomaly_score | display_value |
++----------------------------------+-------+---------------------+--------------+-------------------+---------------+---------------+
+| 4258abfc6de947609f821095471dd0a2 |    94 | 2015-06-13 04:01:55 |          5.6 |              NULL |          NULL |          NULL |
+| 4258abfc6de947609f821095471dd0a2 |    93 | 2015-06-13 04:01:50 |          7.4 |              NULL |          NULL |          NULL |
+| 4258abfc6de947609f821095471dd0a2 |    92 | 2015-06-13 04:01:45 |          4.1 |              NULL |          NULL |          NULL |
+| 4258abfc6de947609f821095471dd0a2 |    91 | 2015-06-13 04:01:40 |          3.7 |              NULL |          NULL |          NULL |
+| 4258abfc6de947609f821095471dd0a2 |    90 | 2015-06-13 04:01:35 |          4.5 |              NULL |          NULL |          NULL |
++----------------------------------+-------+---------------------+--------------+-------------------+---------------+---------------+
+```
+
+Notice that only `uid`, `rowid`, `timestamp`, and `metric_value` are populated.
+The next step will be to explicitly create a model for the `cpu_percent` metric
+so that `raw_anomaly_score` and `anomaly_score` may be populated with anomaly
+scores.
