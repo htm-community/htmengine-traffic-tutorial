@@ -100,8 +100,8 @@ mkdir -p logs
 supervisord -c conf/supervisord.conf
 ```
 
-At this point, the core `htmengine` services are running.  You can see the 
-supervisor status at <http://localhost:9001/> or by running 
+At this point, the core `htmengine` services are running.  You can see the
+supervisor status at <http://localhost:9001/> or by running
 `supervisorctl status`.
 
 ## Usage
@@ -193,3 +193,16 @@ Handling 1 model result(s) for 4258abfc6de947609f821095471dd0a2 - cpu_percent
 4258abfc6de947609f821095471dd0a2 [{u'rowid': 753, u'rawAnomaly': 0.0, u'anomaly': 0.04456546299999997, u'ts': 1434174412.0, u'value': 7.0}]
 ...
 ```
+
+## Final notes
+
+This demonstration represents only the minimal amount of work to bring an
+application online using `htmengine`.  Numenta have done a substantial amount
+of work in making much of the concepts demonstrated here robust and suitable
+for a production workload in our showcase applications Grok, and Taurus.  If
+you're interested in learning more, please see
+[Grok](https://github.com/numenta/numenta-apps/tree/master/grok),
+[Taurus Engine](https://github.com/numenta/numenta-apps/tree/master/taurus),
+and [Taurus Metric Collectors](https://github.com/numenta/numenta-apps/tree/master/taurus.metric_collectors)
+
+Thanks!
