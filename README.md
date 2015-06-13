@@ -3,7 +3,7 @@ So, you want to create an application with htmengine?!
 
 This is a bare-bones, minimal example for building an application on the
 `htmengine` framework.  There are two important steps that must be done
-in order to _user_ htmengine: Configuration the application, and setup the
+in order to _use_ htmengine: Configure the application, and setup the
 database.  Once you have completed the following instructions, you will have
 a running htmengine application.  You may send data to the graphite-compatible
 custom metrics interface, or send data directly into the AMQP exchange, and
@@ -18,6 +18,13 @@ at https://github.com/numenta/numenta-apps.  Clone that repository, and install
 
 ```
 cd numenta-apps/htmengine
+python setup.py develop --user
+```
+
+You'll also need to install `nta.utils`, which is a dependency of `htmengine`:
+
+```
+cd numenta-apps/nta.utils
 python setup.py develop --user
 ```
 
@@ -75,6 +82,7 @@ export APPLICATION_CONFIG_PATH=`pwd`/conf
 Again, from the root of this project:
 
 ```
+pip install alembic [--user]
 python repository/migrate.py
 ```
 
@@ -87,4 +95,4 @@ mkdir -p logs
 supervisord -c conf/supervisord.conf
 ```
 
-At this point, the core `htmengine` services are running.
+At this point, the core `htmengine` services are running. You can see the supervisor status at <http://localhost:9001/>.
