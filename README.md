@@ -10,6 +10,12 @@ graphite-compatible custom metrics interface, or send data directly into the
 AMQP exchange, and receive real-time results from the model results exchange,
 or by polling the database.
 
+You will see in several instances the use of the word "skeleton".  That is the
+_name_ of the app in this demonstration.  In all cases, you should replace
+"skeleton" with the name that you've chosen for your application.  This value
+is used in several places to segment resources by application, so that multiple
+applications may use the same mysql and rabbitmq instance.
+
 ## Before you begin
 
 First, this assumes you have a fresh checkout of the `numenta-apps` repository
@@ -99,4 +105,10 @@ python send_cpu.py
 ```
 
 `send_cpu.py` will run indefinitely, sending cpu percent samples every 5
-seconds into the custom metrics queue for processing by htmengine.
+seconds into the custom metrics queue for processing by htmengine.  In practice
+you should use something like `nohup` to keep this process running in the
+background:
+
+```
+nohup python send_cpu.py > send_cpu.stdout 2> send_cpu.stderr < /dev/null &
+```
