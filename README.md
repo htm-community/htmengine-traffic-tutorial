@@ -196,7 +196,7 @@ Handling 1 model result(s) for 4258abfc6de947609f821095471dd0a2 - cpu_percent
 
 ## That's cool, and all, but I want an HTTP API!
 
-See webapp.py for a minimal web service implementation that implements the
+See `webapp.py` for a minimal web service implementation that implements the
 above described steps in the form of HTTP calls.
 
 First, run the web service:
@@ -219,7 +219,7 @@ Transfer-Encoding: chunked
 Created 6e1f199a74274c5cbf9443f4ab4ad94e
 ```
 
-*Note* you may create the model at any time during the process.  For example,
+**Note** you may create the model at any time during the process.  For example,
 you may send data (described below) over an extended period of time, and then
 trigger the creation of the model at a later time.  In the example above, the
 `min` and `max` is included, but that value may not be known.  Sometimes it is
@@ -260,8 +260,8 @@ $ curl http://localhost:8080/load_average
 The right-most column in the response is the anomaly score.  The first three
 columns are the original data.
 
-*Disclaimer* this web app is only a simple demonstration wrapping htmengine in
-a minimal web service and is not production-ready.
+**Disclaimer** this web app is only a simple demonstration wrapping htmengine
+in a minimal web service and is not production-ready.
 
 ## Final notes
 
