@@ -24,6 +24,7 @@
 
 import json
 import os
+import sys
 import time
 
 import psutil
@@ -55,4 +56,5 @@ if __name__ == "__main__":
     sample = psutil.cpu_percent(interval=5)
     ts = int(time.time())
     sendSample(bus, metricName=metricName, value=sample, epochTimestamp=ts)
-    print "Sent %d @ %d" % (sample, ts)
+    print "Sent %f @ %d" % (sample, ts)
+    sys.stdout.flush()
