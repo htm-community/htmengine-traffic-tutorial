@@ -27,6 +27,13 @@ cd numenta-apps/htmengine
 python setup.py develop --user
 ```
 
+You'll also need to install `nta.utils`, which is a dependency of `htmengine`:
+
+```
+cd numenta-apps/nta.utils
+python setup.py develop --user
+```
+
 ## 1. Create a MySQL database
 
 For example:
@@ -93,7 +100,9 @@ mkdir -p logs
 supervisord -c conf/supervisord.conf
 ```
 
-At this point, the core `htmengine` services are running.
+At this point, the core `htmengine` services are running.  You can see the 
+supervisor status at <http://localhost:9001/> or by running 
+`supervisorctl status`.
 
 ## Usage
 
