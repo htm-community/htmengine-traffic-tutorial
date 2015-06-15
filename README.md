@@ -206,7 +206,7 @@ python webapp.py
 ```
 
 Then, to create a model, send a `PUT` request to the web service on port 8080.
-The URI represents the metric name, and you may optionall speciy model params
+The URI represents the metric name, and you may optionally specify model params
 in the request body.  Using curl on the command line:
 
 ```
