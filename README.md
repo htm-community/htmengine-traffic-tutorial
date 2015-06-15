@@ -194,6 +194,75 @@ Handling 1 model result(s) for 4258abfc6de947609f821095471dd0a2 - cpu_percent
 ...
 ```
 
+## That's cool, and all, but I want an HTTP API!
+
+See `webapp.py` for a minimal web service implementation that implements the
+above described steps in the form of HTTP calls.
+
+First, run the web service:
+
+```
+python webapp.py
+```
+
+Then, to create a model, send a `PUT` request to the web service on port 8080.
+The URI represents the metric name, and you may optionall speciy model params
+in the request body.  Using curl on the command line:
+
+```
+$ curl http://localhost:8080/load_average -X PUT -d '{"min":0, "max":12}' -i
+HTTP/1.1 201 Created
+Content-Type: text/html
+Date: Sat, 13 Jun 2015 21:01:40 GMT
+Transfer-Encoding: chunked
+
+Created 6e1f199a74274c5cbf9443f4ab4ad94e
+```
+
+**Note** you may create the model at any time during the process.  For example,
+you may send data (described below) over an extended period of time, and then
+trigger the creation of the model at a later time.  In the example above, the
+`min` and `max` is included, but that value may not be known.  Sometimes it is
+better to omit the min and max and let htmengine choose a value based on the
+history of a metric.
+
+To send data, send a `POST` request to the same URL you used to create the
+model.  The body of the request must consist of two values: metric value and
+timestamp separated by a single space.  The example below sends load average
+data using curl in an infinite loop at 5 second intervals:
+
+```
+$ while true; do while true; do echo "`(uptime | awk -F'[a-z]:' '{ print $2}' | awk '{print $1}')` `date +%s`" | curl http://localhost:8080/load_average -X POST -d @-; sleep 5; done; done
+Saved /load_average 1.620000 @ 1434229721
+Saved /load_average 1.730000 @ 1434229726
+Saved /load_average 1.590000 @ 1434229731
+Saved /load_average 1.540000 @ 1434229736
+Saved /load_average 1.420000 @ 1434229741
+```
+
+To retrieve data, `GET` data from the same original URL:
+
+```
+$ curl http://localhost:8080/load_average
+/load_average 1.7 1434229625 0.0
+/load_average 1.72 1434229628 0.0
+/load_average 1.72 1434229629 0.0
+/load_average 1.72 1434229630 0.0
+/load_average 1.71 1434229704 0.0
+/load_average 1.73 1434229709 0.0
+/load_average 1.62 1434229721 0.0
+/load_average 1.73 1434229726 0.0
+/load_average 1.59 1434229731 0.0
+/load_average 1.54 1434229736 0.0
+/load_average 1.42 1434229741 0.0
+```
+
+The right-most column in the response is the anomaly score.  The first three
+columns are the original data.
+
+**Disclaimer** this web app is only a simple demonstration wrapping htmengine
+in a minimal web service and is not production-ready.
+
 ## Final notes
 
 This demonstration represents only the minimal amount of work to bring an
