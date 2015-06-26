@@ -66,6 +66,7 @@ def handler(environ, start_response):
     try:
       modelSpec["modelParams"].update(json.load(environ["wsgi.input"]))
     except Exception as e:
+      print e
       start_response("400 Bad Request", [("Content-Type", "text/html")])
       yield "Unable to parse request"
 

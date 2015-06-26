@@ -1,0 +1,5 @@
+node_modules/
+*.log
+
+# This is local application config.
+conf/markers.json
