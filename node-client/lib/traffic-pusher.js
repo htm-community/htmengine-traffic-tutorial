@@ -3,7 +3,8 @@ var fs = require('fs')
   , async = require('async')
   , moment = require('moment-timezone')
   , request = require('request')
-  , DEFAULT_LIMIT = 1000
+  , PRIMER_LIMIT = 10
+  , DEFAULT_LIMIT = 10
   , DEFAULT_INTERVAL = 60000 * 10
   ;
 
@@ -12,18 +13,18 @@ moment.tz.setDefault("America/New_York");
 function TrafficPusher(config) {
     this.dataClient = config.dataClient;
     this.markerFile = config.markerFile;
-    this.htmEngineServer = config.htmEngineServer
+    this.htmEngineServer = config.htmEngineServer;
+    this.limit = config.limit || DEFAULT_LIMIT;
     this.interval = config.interval || DEFAULT_INTERVAL;
+    this.pathDetails = undefined;
 }
 
 TrafficPusher.prototype.init = function(callback) {
     var me = this;
-    function fetchPathData() {
-        me.dataClient.getAllPathData({
-            limit: DEFAULT_LIMIT
-        }, function(err, pathData) {
+    function fetchPathDetails() {
+        me.dataClient.getPaths(function(err, pathDetails) {
             if (err) return callback(err);
-            me.pathData = pathData;
+            me.pathDetails = pathDetails;
             callback();
         });
     }
@@ -31,12 +32,12 @@ TrafficPusher.prototype.init = function(callback) {
         if (! exists) {
             fs.writeFile(me.markerFile, '{}', function(err) {
                 me._markers = {};
-                fetchPathData();
+                fetchPathDetails();
             });
         } else {
             fs.readFile(me.markerFile, 'utf-8', function(err, markerText) {
                 me._markers = JSON.parse(markerText);
-                fetchPathData();
+                fetchPathDetails();
             });
         }
     });
@@ -49,6 +50,7 @@ TrafficPusher.prototype._updateMarker = function(id, ts, callback) {
         if (err) return callback(err);
         markers = JSON.parse(contents);
         markers[id] = ts;
+        console.log('updating marker for %s to %s', id, ts);
         fs.writeFile(me.markerFile, JSON.stringify(markers), function(err) {
             if (err) return callback(err);
             me._markers = markers;
@@ -62,6 +64,7 @@ TrafficPusher.prototype._pushPathData = function(id, data, callback) {
       , url = me.htmEngineServer + '/' + id
       , validData = []
       , posters = [];
+    // console.log('Found %s total data points for path %s.', data.count, id);
     // First, we filter out all the data that has already been pushed to NuPIC,
     // based on our local marker cache.
     validData = _.filter(data.path, function(pathData) {
@@ -74,19 +77,19 @@ TrafficPusher.prototype._pushPathData = function(id, data, callback) {
         // console.log('---\n' + marker + '\n' + dataTime);
         return dataTime > marker;
     });
-    // console.log('%s valid points', validData.length);
+    // console.log('Found %s valid points for %s', validData.length, id);
     _.each(validData, function(pathData) {
         posters.push(function(localCallback) {
             var time = moment(new Date(pathData.DataAsOf))
               , timestamp = time.unix()
               , body = pathData.Speed + ' ' + timestamp
               ;
-            // console.log('posting to %s with %s', url, body);
+            console.log('posting to %s with %s', url, body);
             request.post(url, {body: body}, localCallback);
         });
     });
     if (posters.length) {
-        // console.log('Posting all path data for %s...', id);
+        console.log('Posting all path data for %s...', id);
         async.series(posters, function(err, responses) {
             if (err) return callback(err);
             var time = moment(new Date(data.properties.DataAsOf))
@@ -107,12 +110,19 @@ TrafficPusher.prototype._pushPathData = function(id, data, callback) {
 };
 
 TrafficPusher.prototype.fetchAllPathData = function(callback) {
-    var fetchers = [];
-    _.each(me.pathData, function(data, pathId) {
+    var me = this
+      , fetchers = [];
+    _.each(me.pathDetails.paths, function(pathId) {
         fetchers.push(function(localCallback) {
-            me._pushPathData(pathId, data, localCallback);
+            me.dataClient.getPath(pathId, {
+                limit: me.limit
+            }, function(err, pathData) {
+                if (err) return localCallback(err);
+                me._pushPathData(pathId, pathData, localCallback);
+            });
         });
     });
+    async.series(fetchers, callback);
 };
 
 
@@ -123,7 +133,7 @@ TrafficPusher.prototype.createTrafficModels = function(callback) {
         , max: 80
       }
       , modelCreators = [];
-    _.each(me.pathData, function(data, pathId) {
+    _.each(me.pathDetails.paths, function(data, pathId) {
         modelCreators.push(function(localCallback) {
             var url = me.htmEngineServer + '/' + pathId;
             request({
@@ -139,7 +149,7 @@ TrafficPusher.prototype.createTrafficModels = function(callback) {
 TrafficPusher.prototype.start = function(callback) {
     var me = this;
     console.log('TrafficPusher starting...');
-    me.fetchAllPathData(function(err) {
+    me.fetchAllPathData(function(err, pathData) {
         if (err) throw err;
         console.log('Initial data fetch complete.');
         setInterval(function() {

@@ -34,7 +34,7 @@ trafficPusher.init(function(err) {
         trafficPusher.start(function() {
             // Node server is now running and polling the Travic data service every
             // minute for new data and posting it to HTM Engine web server.
-            console.log('Traffic Pusher is running every %sms', trafficPusher.interval);
+            console.log('Traffic Pusher is running every %ss', (trafficPusher.interval/1000));
         });
     });
 
