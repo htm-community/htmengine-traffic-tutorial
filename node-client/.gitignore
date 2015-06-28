@@ -6,3 +6,7 @@ conf/markers.json
 
 # IDEs
 .idea/
+
+# Static site build
+build/
+

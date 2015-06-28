@@ -11,7 +11,14 @@
   "license": "ISC",
   "dependencies": {
     "async": "^1.2.1",
+    "express": "^4.13.0",
+    "fs-extra": "^0.20.1",
+    "handlebars": "^3.0.3",
     "lodash": "^3.9.3",
+    "metalsmith": "^1.7.0",
+    "metalsmith-in-place": "^1.0.1",
+    "metalsmith-layouts": "^1.0.0",
+    "metalsmith-permalinks": "^0.4.0",
     "moment-timezone": "^0.4.0",
     "request": "^2.57.0"
   }

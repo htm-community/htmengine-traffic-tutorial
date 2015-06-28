@@ -1,0 +1,20 @@
+---
+title: HTM Engine Traffic Tutorial
+layout: main.hbt
+---
+
+<blockquote>
+    This is the Node.js component of the HTM Engine Traffic Tutorial. It has a web server (you're looking at it right now) that displays anomaly results. It is also a client to an HTM Engine server running in Python. 
+</blockquote>
+
+<h2>Traffic Paths</h2>
+
+<ul>
+{{#each paths}}
+    <li>
+        <a href="{{ baseurl }}/{{this}}">
+            Path {{this}}
+        </a>
+    </li>
+{{/each}}
+</ul>

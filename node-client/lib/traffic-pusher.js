@@ -22,7 +22,7 @@ TrafficPusher.prototype.init = function(callback) {
         me.trafficDataClient.getPaths(function(err, pathDetails) {
             if (err) return callback(err);
             me.pathDetails = pathDetails;
-            callback();
+            callback(null, pathDetails.paths);
         });
     });
 };
