@@ -3,3 +3,6 @@ node_modules/
 
 # This is local application config.
 conf/markers.json
+
+# IDEs
+.idea/
