@@ -27,8 +27,7 @@
     <script src="{{baseurl}}/bower_components/lodash/lodash.min.js"></script>
     <script src="{{baseurl}}/bower_components/async/lib/async.js"></script>
     <script src="{{baseurl}}/bower_components/dygraphs/dygraph-combined.js"></script>
-
-
+    <script src="{{baseurl}}/bower_components/moment/min/moment.min.js"></script>
 
   </head>
   <body>

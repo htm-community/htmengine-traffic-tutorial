@@ -12,7 +12,7 @@ var path = require('path')
   , buildDir = path.join(__dirname, destination)
   ;
 
-module.exports = function(pathIds) {
+module.exports = function(pathIds, pathDetails) {
     var baseurl = config.host;
     if (config.port && _.contains(config.host, 'localhost')) {
         baseurl += ':' + config.port;

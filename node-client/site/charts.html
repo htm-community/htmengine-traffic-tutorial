@@ -4,7 +4,7 @@ layout: main.hbt
 ---
 
 {{#each paths}}
-    <div id="chart-{{@key}}"></div>
+    <div id="chart-{{this}}"></div>
 {{/each}}
 
 <script type="text/javascript">
@@ -85,7 +85,7 @@ layout: main.hbt
         };
 
         {{#each paths}}
-            goChart({{@key}});
+            goChart({{this}});
         {{/each}}
 
     });

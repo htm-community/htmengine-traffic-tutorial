@@ -33,10 +33,10 @@ HtmEngineClient.prototype.getData = function(id, callback) {
             return callback(null, []);
         }
         rows = _.map(_.trim(body).split('\n'), function(rowString) {
-            var peices = rowString.split(/\s+/)
-              , value = Number(peices[1])
-              , timestamp = parseInt(peices[2])
-              , anomalyScore = peices[3]
+            var pieces = rowString.split(/\s+/)
+              , value = Number(pieces[1])
+              , timestamp = parseInt(pieces[2])
+              , anomalyScore = pieces[3]
               ;
             if (anomalyScore == 'None') {
                 anomalyScore = undefined;

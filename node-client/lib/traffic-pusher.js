@@ -1,13 +1,50 @@
 var _ = require('lodash')
   , async = require('async')
-  , moment = require('moment-timezone')
+  , moment = require('moment')
   , MIN_SPEED = 0
   , MAX_SPEED = 80
-  , PRIMER_LIMIT = 500
+  , PRIMER_LIMIT = 5000
   , ASYNC_MAX = 20
   ;
 
-moment.tz.setDefault("America/New_York");
+function timeStringToMoment(timeIn) {
+    // 2015-06-29T14:22:49
+    var dateString = timeIn.split('T').shift()
+      , timeString = timeIn.split('T').pop()
+      , datePieces = dateString.split('-')
+      , timePieces = timeString.split(':')
+      , timeObject = {}
+      ;
+
+    timeObject.year = parseInt(datePieces.shift())
+    timeObject.month = parseInt(datePieces.shift()) - 1
+    timeObject.day = parseInt(datePieces.shift())
+    timeObject.hour = parseInt(timePieces.shift())
+    timeObject.minute = parseInt(timePieces.shift())
+    timeObject.second = parseInt(timePieces.shift())
+
+    return moment(timeObject)
+}
+
+function timeStringToMoment_2(timeIn) {
+    // 6/29/2015 16:42:48
+    var dateString = timeIn.split(' ').shift()
+      , timeString = timeIn.split(' ').pop()
+      , datePieces = dateString.split('/')
+      , timePieces = timeString.split(':')
+      , timeObject = {}
+      ;
+
+    timeObject.month = parseInt(datePieces.shift()) - 1
+    timeObject.day = parseInt(datePieces.shift())
+    timeObject.year = parseInt(datePieces.shift())
+    timeObject.hour = parseInt(timePieces.shift())
+    timeObject.minute = parseInt(timePieces.shift())
+    timeObject.second = parseInt(timePieces.shift())
+
+    return moment(timeObject)
+}
+
 
 function TrafficPusher(config) {
     this.trafficDataClient = config.trafficDataClient;
@@ -16,13 +53,29 @@ function TrafficPusher(config) {
     this.pathIds = undefined;
 }
 
-TrafficPusher.prototype.init = function(callback) {
+TrafficPusher.prototype.init = function(maxPaths, callback) {
     var me = this;
     me.trafficDataClient.getPaths(function(err, pathDetails) {
         if (err) return callback(err);
         me.pathDetails = pathDetails;
         me.pathIds = _.keys(pathDetails.paths);
-        callback(null, pathDetails.paths);
+        // We do not want to use some paths with stale data. If the DataAsOf prop
+        // is older than a month, we'll remove it from the path ids so it doesn't
+        // get processed.
+        _.each(pathDetails.paths, function(details, id) {
+            var date = timeStringToMoment_2(details.DataAsOf)
+              , monthAgo = moment(new Date()).subtract(1, 'month')
+              ;
+            if (date < monthAgo) {
+                console.log('Suppressing path %s because of old data', id);
+                me.pathIds.splice(me.pathIds.indexOf(id), 1);
+            }
+        });
+        // For debugging with fewer than all the paths
+        if (maxPaths) {
+            me.pathIds = me.pathIds.slice(0, maxPaths);
+        }
+        callback(null, me.pathIds, pathDetails.paths);
     });
 };
 
@@ -66,7 +119,8 @@ TrafficPusher.prototype.fetch = function(callback) {
                     var htmPosters = [];
                     _.each(allPaths.path, function(pathData) {
                         htmPosters.push(function(htmCallback) {
-                            var timestamp = moment(new Date(pathData.DataAsOf)).unix();
+                            var timestamp = 
+                                timeStringToMoment(pathData.DataAsOf).unix();
                             me.htmEngineClient.postData(
                                 id, pathData.Speed, timestamp, htmCallback
                             );

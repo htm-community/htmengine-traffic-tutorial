@@ -42,14 +42,12 @@ layout: main.hbt
                     if (dow === 0) {
                         highlight_period(w,w+12*3600*1000);
                     }
-                    // find first saturday
+                    // find first Saturday
                     while (dow != 6) {
                         w += 24*3600*1000;
                         d = new Date(w);
                         dow = d.getUTCDay();
                     }
-                    // shift back 1/2 day to center highlight around the point for the day
-                    w -= 12*3600*1000;
 
                     canvas.fillStyle = yellow;
                     while (w < max_data_x) {
@@ -67,14 +65,6 @@ layout: main.hbt
                         w += 7*24*3600*1000;
                     }
 
-                    // Go back to beginning for this loop
-                    canvas.fillStyle = red;
-
-                    // THIS IS REALLY SLOW :(
-
-                    // for (var i = min_data_x; i < max_data_x; i++) {
-                    //     // console.log(i);
-                    // }
                 }
             }
         );

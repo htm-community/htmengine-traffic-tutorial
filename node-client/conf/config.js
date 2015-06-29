@@ -10,4 +10,7 @@ module.exports = {
 
   , interval: '10 minutes'
 
+    // This helps for debugging without pulling in the entire dataset.
+  , maxPaths: 0
+
 };
