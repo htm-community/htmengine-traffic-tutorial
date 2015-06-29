@@ -10,8 +10,7 @@ var path = require('path')
   , config = require('./conf/config')
   
   , htmEngineServerUri = 'http://localhost:8080'
-  , dataServerUri = 'http://sheltered-oasis-4180.herokuapp.com'
-  // , dataServerUri = 'http://localhost:8081'
+  , dataServerUri = config.dataServer
   
   , trafficDataClient
   , htmEngineClient

@@ -25,6 +25,7 @@ import json
 import os
 
 from gevent import pywsgi
+from cgi import parse_qs
 
 from nta.utils import message_bus_connector
 from nta.utils.config import Config
@@ -91,6 +92,10 @@ def handler(environ, start_response):
 
       yield "Saved %s %f @ %d\n" % (metricName, float(value), int(ts))
   elif environ["REQUEST_METHOD"] == "GET":
+    # parameters = parse_qs(environ.get('QUERY_STRING', ''))
+    # print parameters
+    # if 'since' in parameters:
+    #   since = parameters['since'][0]
     with repository.engineFactory(appConfig).connect() as conn:
       fields = (schema.metric_data.c.metric_value,
                 schema.metric_data.c.timestamp,
