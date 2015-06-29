@@ -3,7 +3,7 @@ var _ = require('lodash')
   , moment = require('moment-timezone')
   , MIN_SPEED = 0
   , MAX_SPEED = 80
-  , PRIMER_LIMIT = 100000
+  , PRIMER_LIMIT = 500
   , ASYNC_MAX = 20
   ;
 
@@ -29,7 +29,7 @@ TrafficPusher.prototype.init = function(callback) {
 TrafficPusher.prototype.createTrafficModels = function(callback) {
     var me = this
       , modelCreators = [];
-    _.each(me.pathIds, function(data, pathId) {
+    _.each(me.pathIds, function(pathId) {
         modelCreators.push(function(localCallback) {
             me.htmEngineClient.createModel(
                 pathId, MIN_SPEED, MAX_SPEED, localCallback
@@ -50,7 +50,8 @@ TrafficPusher.prototype.fetch = function(callback) {
     });
     console.log('Getting last updated times for all paths...');
     async.parallel(lastUpdatedFetchers, function(err, lastUpdated) {
-        var primers = {};
+        var primers = {}
+          , complete = 0;
         _.each(me.pathIds, function(id) {
             primers[id] = function(localCallback) {
                 var params = {};
@@ -61,10 +62,9 @@ TrafficPusher.prototype.fetch = function(callback) {
                     // If this is the first data fetch, get only some rows.
                     params.limit = PRIMER_LIMIT;
                 }
-                me.trafficDataClient.getPath(id, params, function(err, pathData) {
+                me.trafficDataClient.getPath(id, params, function(err, allPaths) {
                     var htmPosters = [];
-                    console.log('Received RTE %s data: %s points', id, pathData.count);
-                    _.each(pathData.path, function(pathData) {
+                    _.each(allPaths.path, function(pathData) {
                         htmPosters.push(function(htmCallback) {
                             var timestamp = moment(new Date(pathData.DataAsOf)).unix();
                             me.htmEngineClient.postData(
@@ -72,9 +72,16 @@ TrafficPusher.prototype.fetch = function(callback) {
                             );
                         });
                     });
-                    console.log('Posting %s data to HTM engine...', id);
+                    console.log(
+                        'Path %s: posting %s data points to HTM engine...', 
+                        id, allPaths.count
+                    );
                     async.series(htmPosters, function(err) {
-                        console.log('Done posting %s data to HTM engine.', id);
+                        var left = me.pathIds.length - ++complete;
+                        console.log(
+                            'Path %s: posted to HTM engine (%s more to go)...', 
+                            id, left
+                        );
                         localCallback(err);
                     });
                 });

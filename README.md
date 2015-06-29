@@ -50,13 +50,15 @@ Provides a simple GET/POST/PUT HTTP interface on top of the HTM Engine.
     cd python-engine
     python webapp.py
 
+This will run at http://localhost:8080.
+
 ## HTM Client (JavaScript)
 
     cd node-client
     npm install .
     npm start
 
-You only need to `npm install` once.
+This will run at http://localhost:8083. You only need to `npm install` once. 
 
 * * *
 
