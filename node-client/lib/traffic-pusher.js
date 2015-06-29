@@ -13,6 +13,7 @@ function TrafficPusher(config) {
     this.htmEngineClient = config.htmEngineClient;
     this.markerManager = config.markerManager;
     this.pathDetails = undefined;
+    this.pathIds = undefined;
 }
 
 TrafficPusher.prototype.init = function(callback) {
@@ -22,6 +23,7 @@ TrafficPusher.prototype.init = function(callback) {
         me.trafficDataClient.getPaths(function(err, pathDetails) {
             if (err) return callback(err);
             me.pathDetails = pathDetails;
+            me.pathIds = _.keys(pathDetails.paths);
             callback(null, pathDetails.paths);
         });
     });
@@ -30,7 +32,7 @@ TrafficPusher.prototype.init = function(callback) {
 TrafficPusher.prototype.createTrafficModels = function(callback) {
     var me = this
       , modelCreators = [];
-    _.each(me.pathDetails.paths, function(data, pathId) {
+    _.each(me.pathIds, function(data, pathId) {
         modelCreators.push(function(localCallback) {
             me.htmEngineClient.createModel(
                 pathId, MIN_SPEED, MAX_SPEED, localCallback
@@ -44,7 +46,7 @@ TrafficPusher.prototype.fetch = function(callback) {
     var me = this
       , lastUpdatedFetchers = {};
     console.log('Fetching traffic data...');
-    _.each(me.pathDetails.paths, function(id) {
+    _.each(me.pathIds, function(id) {
         lastUpdatedFetchers[id] = function(localCallback) {
             me.htmEngineClient.getLastUpdated(id, localCallback);
         };
@@ -52,7 +54,7 @@ TrafficPusher.prototype.fetch = function(callback) {
     console.log('Getting last updated times for all paths...');
     async.parallel(lastUpdatedFetchers, function(err, lastUpdated) {
         var primers = {};
-        _.each(me.pathDetails.paths, function(id) {
+        _.each(me.pathIds, function(id) {
             primers[id] = function(localCallback) {
                 var params = {};
                 if (lastUpdated[id]) {

@@ -7,7 +7,7 @@ function TrafficDataClient(uri) {
 }
 
 TrafficDataClient.prototype.getPaths = function(callback) {
-    var url = this.uri + '/paths/';
+    var url = this.uri + '/paths/?includeDetails=1';
     request.get(url, function(error, response, body) {
         var jsonOut;
         try {

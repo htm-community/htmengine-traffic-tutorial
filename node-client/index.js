@@ -6,6 +6,7 @@ var path = require('path')
   , TrafficPusher = require('./lib/traffic-pusher')
   , HtmEngineClient = require('./lib/htm-engine-client')
   , MarkerManager = require('./lib/marker-manager')
+  , ajaxInitializer = require('./lib/ajax-data-handler')
   , config = require('./conf/config')
   
   , localMarkerFile = path.join(__dirname, 'conf', 'markers.json')
@@ -38,6 +39,7 @@ trafficPusher.init(function(err, pathIds) {
 
     buildStaticSite(pathIds);
     app.use(express.static('build'));
+    app.use('/data/:pathId', ajaxInitializer(htmEngineClient));
     app.listen(config.port, function(error) {
         if (error) return console.error(error);
         console.log('%s:%s', config.host, config.port);

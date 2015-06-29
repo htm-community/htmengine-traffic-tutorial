@@ -9,12 +9,31 @@ layout: main.hbt
 
 <h2>Traffic Paths</h2>
 
-<ul>
+<table>
+<tbody>
+<tr>
+    <th>ID</th>
+    <th>Approximate Address</th>
+    <th>Borough</th>
+</tr>
 {{#each paths}}
-    <li>
-        <a href="{{ baseurl }}/{{this}}">
-            Path {{this}}
+    <tr>
+    <td>
+        <a href="{{ baseurl }}/chart?{{@key}}">
+            {{@key}}
         </a>
-    </li>
+    </td>
+    <td>
+        <a href="{{ baseurl }}/chart?{{@key}}">
+            {{this.linkName}}
+        </a>
+    </td>
+    <td>
+        <a href="{{ baseurl }}/chart?{{@key}}">
+            {{this.Borough}}
+        </a>
+    </td>
+    </tr>
 {{/each}}
-</ul>
+</tbody>
+</table>
