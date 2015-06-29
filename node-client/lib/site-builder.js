@@ -24,7 +24,7 @@ module.exports = function(pathIds) {
         .destination(destination)
         .use(templates({
             engine: 'handlebars'
-          , pattern: 'index.html'
+          , pattern: '*.html'
           , baseurl: baseurl
           , paths: pathIds
         }))

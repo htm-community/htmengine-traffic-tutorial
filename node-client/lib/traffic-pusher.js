@@ -3,7 +3,8 @@ var _ = require('lodash')
   , moment = require('moment-timezone')
   , MIN_SPEED = 0
   , MAX_SPEED = 80
-  , PRIMER_LIMIT = 500
+  , PRIMER_LIMIT = 100000
+  , ASYNC_MAX = 20
   ;
 
 moment.tz.setDefault("America/New_York");
@@ -11,21 +12,17 @@ moment.tz.setDefault("America/New_York");
 function TrafficPusher(config) {
     this.trafficDataClient = config.trafficDataClient;
     this.htmEngineClient = config.htmEngineClient;
-    this.markerManager = config.markerManager;
     this.pathDetails = undefined;
     this.pathIds = undefined;
 }
 
 TrafficPusher.prototype.init = function(callback) {
     var me = this;
-    me.markerManager.init(function(err) {
+    me.trafficDataClient.getPaths(function(err, pathDetails) {
         if (err) return callback(err);
-        me.trafficDataClient.getPaths(function(err, pathDetails) {
-            if (err) return callback(err);
-            me.pathDetails = pathDetails;
-            me.pathIds = _.keys(pathDetails.paths);
-            callback(null, pathDetails.paths);
-        });
+        me.pathDetails = pathDetails;
+        me.pathIds = _.keys(pathDetails.paths);
+        callback(null, pathDetails.paths);
     });
 };
 
@@ -64,31 +61,26 @@ TrafficPusher.prototype.fetch = function(callback) {
                     // If this is the first data fetch, get only some rows.
                     params.limit = PRIMER_LIMIT;
                 }
-                me.trafficDataClient.getPath(id, params, localCallback);
-            };
-        });
-        async.parallel(primers, function(err, primerData) {
-            var htmPosters = [];
-            _.each(primerData, function(pathData, id) {
-                _.each(pathData.path, function(pathData) {
-                    var timestamp = moment(new Date(pathData.DataAsOf)).unix();
-                    // if (me.markerManager.isNew(id, timestamp)) {
-                        htmPosters.push(function(localCallback) {
+                me.trafficDataClient.getPath(id, params, function(err, pathData) {
+                    var htmPosters = [];
+                    console.log('Received RTE %s data: %s points', id, pathData.count);
+                    _.each(pathData.path, function(pathData) {
+                        htmPosters.push(function(htmCallback) {
+                            var timestamp = moment(new Date(pathData.DataAsOf)).unix();
                             me.htmEngineClient.postData(
-                                id, pathData.Speed, timestamp, localCallback
+                                id, pathData.Speed, timestamp, htmCallback
                             );
                         });
-                    // }
+                    });
+                    console.log('Posting %s data to HTM engine...', id);
+                    async.series(htmPosters, function(err) {
+                        console.log('Done posting %s data to HTM engine.', id);
+                        localCallback(err);
+                    });
                 });
-            });
-            async.series(htmPosters, function(err) {
-                if (err) {
-                    if (callback) callback(err);
-                    return;
-                }
-                me.markerManager.update(lastUpdated, callback);
-            });
+            };
         });
+        async.parallel(primers, callback);
     });
 };
 
@@ -105,7 +97,10 @@ TrafficPusher.prototype.start = function(interval) {
         console.log('%s Models created.', modelCreatedResponses.length);
         me.fetch(function(err) {
             if (err) throw err;
-            console.log('Polling traffic data at %ss intervals...', interval);
+            console.log(
+                'Polling traffic data at %s intervals...',
+                moment.duration(interval, 'ms').humanize()
+            );
             setInterval(function() {
                 me.fetch();
             }, interval);

@@ -1,15 +1,14 @@
 var path = require('path')
   , express = require('express')
+  , moment = require('moment')
 
   , buildStaticSite = require('./lib/site-builder')
   , TrafficDataClient = require('./lib/traffic-data-client')
   , TrafficPusher = require('./lib/traffic-pusher')
   , HtmEngineClient = require('./lib/htm-engine-client')
-  , MarkerManager = require('./lib/marker-manager')
   , ajaxInitializer = require('./lib/ajax-data-handler')
   , config = require('./conf/config')
   
-  , localMarkerFile = path.join(__dirname, 'conf', 'markers.json')
   , htmEngineServerUri = 'http://localhost:8080'
   , dataServerUri = 'http://sheltered-oasis-4180.herokuapp.com'
   // , dataServerUri = 'http://localhost:8081'
@@ -18,8 +17,10 @@ var path = require('path')
   , htmEngineClient
   , trafficPusher
   , app = express()
-  , FETCH_INTERVAL = 10000
+  , interval = config.interval.split(/\s+/)
   ;
+
+interval = moment.duration(parseInt(interval.shift()), interval.shift());
 
 trafficDataClient = new TrafficDataClient(dataServerUri);
 htmEngineClient = new HtmEngineClient(htmEngineServerUri);
@@ -27,13 +28,12 @@ htmEngineClient = new HtmEngineClient(htmEngineServerUri);
 trafficPusher = new TrafficPusher({
     trafficDataClient: trafficDataClient
   , htmEngineClient: htmEngineClient
-  , markerManager: new MarkerManager(localMarkerFile)
 });
 
 trafficPusher.init(function(err, pathIds) {
     if (err) throw err;
 
-    // trafficPusher.start(FETCH_INTERVAL);
+    trafficPusher.start(interval.asMilliseconds());
     // Node server is now running and polling the Travic data service every
     // minute for new data and posting it to HTM Engine web server.
 

@@ -10,7 +10,7 @@ HtmEngineClient.prototype.postData = function(id, value, timestamp, callback) {
     var url = this.url + '/' + id
       , body = value + ' ' + timestamp
       ;
-    console.log('posting to %s with %s', url, body);
+    // console.log('posting to %s with %s', url, body);
     request.post(url, {body: body}, callback);
 };
 
