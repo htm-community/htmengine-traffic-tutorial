@@ -7,7 +7,8 @@ layout: main.hbt
     This is the Node.js component of the HTM Engine Traffic Tutorial. It has a web server (you're looking at it right now) that displays anomaly results. It is also a client to an HTM Engine server running in Python. 
 </blockquote>
 
-<h2><a href="{{ ../baseurl }}/map/" taret="_blank">The Map</a></h2>
+<h2><a href="{{ ../baseurl }}/map/" taret="_blank">All Traffic Paths Mapped</a></h2>
+<h2><a href="{{ ../baseurl }}/_charts/" taret="_blank">All Traffic Paths Charted</a></h2>
 
 <h2>Boroughs</h2>
 
@@ -25,7 +26,17 @@ layout: main.hbt
     </td>
     <td>
         <a href="{{ ../baseurl }}/_charts?borough={{this}}">
-            chart
+            all charts
+        </a>
+    </td>
+    <td>
+        <a href="{{ ../baseurl }}/_anomalies?borough={{this}}">
+            combined anomaly chart (long load)
+        </a>
+    </td>
+    <td>
+        <a href="{{ ../baseurl }}/_averageAnomaly?borough={{this}}">
+            avg anomaly chart (long load)
         </a>
     </td>
     </tr>
@@ -34,6 +45,8 @@ layout: main.hbt
 </table>
 
 <h2>Traffic Paths</h2>
+
+<p>Click on the table headers to sort.</p>
 
 <table id="traffic_paths" class="tablesorter">
 <thead>

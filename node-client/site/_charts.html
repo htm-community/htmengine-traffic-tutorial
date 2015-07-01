@@ -16,21 +16,26 @@ layout: main.hbt
             var csvPath = "/data/" + id;
 
             $('#title').after(
-                "<h4>" + id + "</h4>"
+                "<table><tbody>"
+              + "<tr><td>"
+              + id + "<br/>" + details.linkName
+              + "</td><td>" 
               + "<div id='chart-" + id + "'></div>"
+              + "</td></tr>"
+              + "</tbody></table>"
             );
 
             new Dygraph(
                 document.getElementById("chart-" + id)
               , csvPath
               , { 
-                    width: docWidth * 0.9
+                    width: docWidth * 0.8
+                  , height: 100
                   , anomaly: {
                         axis: {}
                       , color: "red"
                     }
                   , underlayCallback: function(canvas, area, g) {
-                        var red = "rgba(247, 141, 184, 0.5)";
                         var yellow = "rgba(255, 255, 102, 1.0)";
 
                         function highlight_period(x_start, x_end) {
@@ -76,15 +81,6 @@ layout: main.hbt
                             // calculate start of highlight for next Saturday 
                             w += 7*24*3600*1000;
                         }
-
-                        // Go back to beginning for this loop
-                        canvas.fillStyle = red;
-
-                        // THIS IS REALLY SLOW :(
-
-                        // for (var i = min_data_x; i < max_data_x; i++) {
-                        //     // console.log(i);
-                        // }
                     }
                 }
             );

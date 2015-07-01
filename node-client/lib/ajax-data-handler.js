@@ -63,8 +63,16 @@ function fetchPathData(pathIds, callback) {
     async.parallel(dataFetchers, callback);
 }
 
+function filterPathIdsByBorough(ids, borough) {
+    if (! borough) return ids;
+    return _.filter(ids, function(id) {
+        return pathDetails[id].Borough.toLowerCase() == borough.toLowerCase();
+    });
+}
+
 function getAllAnomalies(req, res) {
-    fetchPathData(pathIds, function(err, pathData) {
+    var paths = filterPathIdsByBorough(pathIds, req.query.borough);
+    fetchPathData(paths, function(err, pathData) {
         var keys
           , matrix = {};
 
@@ -105,7 +113,8 @@ function getAllAnomalies(req, res) {
 }
 
 function getAnomalyAverage(req, res) {
-    fetchPathData(pathIds, function(err, pathData) {
+    var paths = filterPathIdsByBorough(pathIds, req.query.borough);
+    fetchPathData(paths, function(err, pathData) {
         var keys
           , timeKeys
           , matrix = {};

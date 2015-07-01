@@ -45,8 +45,12 @@
 
             var routes = []
             var query = {
-                borough: getUrlVars()['borough'].replace('%20',' ')
+                borough: getUrlVars()['borough']
             };
+            if (query.borough) {
+                query.borough = query.borough.replace('%20',' ')
+                $('#title h1').html(query.borough);
+            }
 
             var map = new google.maps.Map(
                 document.getElementById('map-canvas'), mapOptions
@@ -73,11 +77,6 @@
                               && Math.abs(closePoint.lng() - Number(lon)) < 0.01 
                 }
                 return validNumbers && validPoint;
-            }
-
-
-            if (query.borough) {
-                $('#title h1').html(query.borough);
             }
 
             $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
