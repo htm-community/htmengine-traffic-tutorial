@@ -1,8 +1,19 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link href="{{baseurl}}/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <style type="text/css">
       html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
+      #title {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        background-color: white;
+        border-radius: 3px;
+        border: solid black 3px;
+        padding: 0 20px;
+        z-index: 9999;
+      }
     </style>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
@@ -13,12 +24,31 @@
     </script>
     <script type="text/javascript">
         function initialize() {
+
+            // $('#title h1').html('All Routes');
+
+            // Read a page's GET URL variables and return them as an associative array.
+            function getUrlVars() {
+                var vars = [], hash;
+                var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+                for(var i = 0; i < hashes.length; i++)
+                {
+                    hash = hashes[i].split('=');
+                    vars.push(hash[0]);
+                    vars[hash[0]] = hash[1];
+                }
+                return vars;
+            }
+
             var mapOptions = {
                 center: { lat: 40.7903, lng: -73.9597},
                 zoom: 11
             };
 
             var routes = []
+            var query = {
+                borough: getUrlVars()['borough'].replace('%20',' ')
+            };
 
             var map = new google.maps.Map(
                 document.getElementById('map-canvas'), mapOptions
@@ -48,7 +78,7 @@
             }
 
 
-            $.getJSON('{{ baseurl }}/data/pathDetails', function(data) {
+            $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
                 _.each(data.paths, function(pathData, pathId) {
                     var linkStrings = pathData.linkPoints.trim().split(/\s+/)
                       , coords = []
@@ -74,9 +104,6 @@
 
                     });
 
-                    // console.log(pathId);
-                    // console.log(coords);
-
                     trafficRoute = new google.maps.Polyline({
                         path: coords
                       , geodesic: true
@@ -90,6 +117,22 @@
                       , map: map
                       , animation: google.maps.Animation.DROP
                       , title: 'Route ' + pathId
+                    });
+
+                    var contentString 
+                        = '<h3>Route ' + pathId + '</h3>'
+                        + '<h4>' + pathData.Borough + '</h4>'
+                        + '<p>' + pathData.linkName + '<br/>'
+                        + '<a href="{{ baseurl }}/chart?' + pathId + '">chart</a>'
+                        + '</p>'
+                        ;
+
+                    var infowindow = new google.maps.InfoWindow({
+                        content: contentString
+                    });
+
+                    google.maps.event.addListener(marker, 'click', function() {
+                        infowindow.open(map, marker);
                     });
 
                     routes.push({
@@ -112,6 +155,11 @@
 
   </head>
   <body>
+    <div id="title">
+        <h1>All Routes</h1>
+        <h2><a href="{{ baseurl }}">HOME</a></h2>
+        <p>Each route has a marker at its first point. Click it to get more details.</p>
+    </div>
     <div id="map-canvas"></div>
   </body>
 </html>

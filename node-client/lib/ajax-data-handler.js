@@ -56,7 +56,6 @@ function getPathData(req, res) {
 function fetchPathData(pathIds, callback) {
     var dataFetchers = {};
     _.each(pathIds, function(id) {
-        console.log(id);
         dataFetchers[id] = function(localCallback) {
             htmEngineClient.getData(id, localCallback);
         };
@@ -180,6 +179,21 @@ function getAnomalyAverage(req, res) {
 function getPathDetails(req, res) {
     trafficDataClient.getPaths(function(err, data) {
         if (err) return jsonUtils.renderErrors([err], res);
+        // filter boroughs if necessary
+        var doomed = []
+          , borough;
+        if (req.query && req.query.borough) {
+            borough = req.query.borough;
+            _.each(data.paths, function(details, id) {
+                if (details.Borough.toLowerCase() != borough.toLowerCase()) {
+                    doomed.push(id);
+                }
+            });
+            _.each(doomed, function(toRemove) {
+                delete data.paths[toRemove];
+            });
+            data.count -= doomed.length;
+        }
         jsonUtils.render(data, res);
     });
 }

@@ -16,7 +16,7 @@ var path = require('path')
 
 function extractBoroughs(paths) {
     return _.unique(_.map(paths, function(p) {
-        return p.Borough;
+        return p.Borough.toUpperCase();
     }));
 }
 

@@ -15,7 +15,11 @@ layout: main.hbt
 
 <ul>
 {{#each boroughs}}
-    <li>{{this}}</li>
+    <li>
+        <a href="{{ ../baseurl }}/map?borough={{this}}">
+            {{this}}
+        </a>
+    </li>
 {{/each}}
 </ul>
 
