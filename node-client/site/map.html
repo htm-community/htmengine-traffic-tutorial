@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css">
+      html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="{{baseurl}}/bower_components/lodash/lodash.min.js"></script>
+
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key={{ googleApiKey }}">
+    </script>
+    <script type="text/javascript">
+        function initialize() {
+            var mapOptions = {
+                center: { lat: 40.7903, lng: -73.9597},
+                zoom: 11
+            };
+
+            var routes = []
+
+            var map = new google.maps.Map(
+                document.getElementById('map-canvas'), mapOptions
+            );
+
+            function isNumeric(n) {
+                return !isNaN(parseFloat(n)) && isFinite(n);
+            }
+
+            function getRandomColor() {
+                var letters = '0123456789ABCDEF'.split('');
+                var color = '#';
+                for (var i = 0; i < 6; i++ ) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
+
+            function isGoodCoordinate(lat, lon, closePoint) {
+                var validNumbers = isNumeric(lat) && isNumeric(lon)
+                  , validPoint = true;
+                if (validNumbers && closePoint) {
+                    validPoint = Math.abs(closePoint.lat() - Number(lat)) < 0.01 
+                              && Math.abs(closePoint.lng() - Number(lon)) < 0.01 
+                }
+                return validNumbers && validPoint;
+            }
+
+
+            $.getJSON('{{ baseurl }}/data/pathDetails', function(data) {
+                _.each(data.paths, function(pathData, pathId) {
+                    var linkStrings = pathData.linkPoints.trim().split(/\s+/)
+                      , coords = []
+                      , lastCoord
+                      , trafficRoute
+                      ;
+                    _.each(linkStrings, function(point) {
+                        var points = point.split(',')
+                          , lat = points.shift()
+                          , lon = points.shift()
+                          ;
+
+                        // The data from NYCDOT is crap.
+                        if (isGoodCoordinate(lat, lon, lastCoord)) {
+                            lastCoord = new google.maps.LatLng(
+                                Number(lat)
+                              , Number(lon)
+                            );
+                            coords.push(lastCoord);
+                        } else {
+                            console.log('Skipped %s coordinate "%s"', pathId, point)
+                        }
+
+                    });
+
+                    // console.log(pathId);
+                    // console.log(coords);
+
+                    trafficRoute = new google.maps.Polyline({
+                        path: coords
+                      , geodesic: true
+                      , strokeColor: getRandomColor()
+                      , strokeOpacity: 1.0
+                      , strokeWeight: 5
+                    });
+
+                    var marker = new google.maps.Marker({
+                        position: coords[0]
+                      , map: map
+                      , animation: google.maps.Animation.DROP
+                      , title: 'Route ' + pathId
+                    });
+
+                    routes.push({
+                        id: pathId
+                      , line: trafficRoute
+                      , details: pathData
+                    });
+
+                });
+
+                _.each(routes, function(route) {
+                    route.line.setMap(map);
+                });
+            });
+
+        }
+        google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+
+  </head>
+  <body>
+    <div id="map-canvas"></div>
+  </body>
+</html>

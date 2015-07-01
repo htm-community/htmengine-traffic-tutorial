@@ -8,11 +8,19 @@ var path = require('path')
   , config = require('../conf/config')
   , source = '../site'
   , destination = '../build'
+  , googleApiKey = process.env['GOOGLE_API_KEY']
   , layoutDir = path.join(__dirname, source, 'layouts')
   , buildDir = path.join(__dirname, destination)
   ;
 
-module.exports = function(pathIds, pathDetails) {
+
+function extractBoroughs(paths) {
+    return _.unique(_.map(paths, function(p) {
+        return p.Borough;
+    }));
+}
+
+module.exports = function(pathDetails, dataSourceUrl, htmEngineServerUrl) {
     var baseurl = config.host;
     if (config.port && _.contains(config.host, 'localhost')) {
         baseurl += ':' + config.port;
@@ -26,7 +34,11 @@ module.exports = function(pathIds, pathDetails) {
             engine: 'handlebars'
           , pattern: '*.html'
           , baseurl: baseurl
-          , paths: pathIds
+          , dataSourceUrl: dataSourceUrl
+          , htmEngineServerUrl: htmEngineServerUrl
+          , paths: pathDetails
+          , boroughs: extractBoroughs(pathDetails)
+          , googleApiKey: googleApiKey
         }))
         .use(layouts({
             engine: 'handlebars'

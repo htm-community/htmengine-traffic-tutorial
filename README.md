@@ -30,6 +30,10 @@ at https://github.com/oxtopus/skeleton-htmengine-app
 ( just do it )
 - [Node.js](https://nodejs.org) & [NPM](http://npmjs.org) (hopefully it came with it)
 
+Also, if you want to view the map of all the traffic paths (at `http://localhost:8083/map`) you'll need a [Google Maps API key](https://developers.google.com/maps/).
+
+    export GOOGLE_API_KEY=<your key>
+
 # Startup
 
 ## HTM Engine (Python)
@@ -58,8 +62,8 @@ This will run at http://localhost:8080.
     npm install .
     npm start
 
-This will run at http://localhost:8083. You only need to `npm install` once. 
+This will run at <http://localhost:8083>. You only need to run `npm install` once. 
 
 * * *
 
-This is a work in progress, something models are not starting.
+This is a work in progress.

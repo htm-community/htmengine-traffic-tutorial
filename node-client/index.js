@@ -1,6 +1,7 @@
 var path = require('path')
   , express = require('express')
   , moment = require('moment')
+  , _ = require('lodash')
 
   , buildStaticSite = require('./lib/site-builder')
   , TrafficDataClient = require('./lib/traffic-data-client')
@@ -32,19 +33,32 @@ trafficPusher = new TrafficPusher({
 });
 
 trafficPusher.init(maxPaths, function(err, pathIds, pathDetails) {
+    var allPathData = [];
+
     if (err) throw err;
 
-    // trafficPusher.start(interval.asMilliseconds());
+    trafficPusher.start(interval.asMilliseconds());
 
     // Node server is now running and polling the Travic data service every
     // minute for new data and posting it to HTM Engine web server.
 
-    ajaxRequestHandlers = ajaxInitializer(htmEngineClient, pathIds, pathDetails);
+    ajaxRequestHandlers = ajaxInitializer(
+        htmEngineClient
+      , trafficDataClient
+      , pathIds
+      , pathDetails
+    );
 
-    buildStaticSite(pathIds, pathDetails);
+    // Prep some template data for the static site.
+    _.each(pathIds, function(id) {
+        allPathData.push(pathDetails[id]);
+    });
+
+    buildStaticSite(allPathData, dataServerUri, htmEngineServerUri);
     app.use(express.static('build'));
     app.use('/data/anomalies', ajaxRequestHandlers.getAllAnomalies);
     app.use('/data/anomalyAverage', ajaxRequestHandlers.getAnomalyAverage);
+    app.use('/data/pathDetails', ajaxRequestHandlers.getPathDetails);
     app.use('/data/:pathId', ajaxRequestHandlers.getPathData);
     app.listen(config.port, function(error) {
         if (error) return console.error(error);

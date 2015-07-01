@@ -7,6 +7,18 @@ layout: main.hbt
     This is the Node.js component of the HTM Engine Traffic Tutorial. It has a web server (you're looking at it right now) that displays anomaly results. It is also a client to an HTM Engine server running in Python. 
 </blockquote>
 
+<h2><a href="{{ ../baseurl }}/map/" taret="_blank">The Map</a></h2>
+
+<h2>Boroughs</h2>
+
+<p/>I'm planning on separating the traffic paths by borough, but I haven't done it yet. 
+
+<ul>
+{{#each boroughs}}
+    <li>{{this}}</li>
+{{/each}}
+</ul>
+
 <h2>Traffic Paths</h2>
 
 <table>
@@ -15,24 +27,47 @@ layout: main.hbt
     <th>ID</th>
     <th>Approximate Address</th>
     <th>Borough</th>
+    <th>Data As Of (NYC time)</th>
+    <th>Chart</th>
+    <th>CSV</th>
+    <th>HTM Engine Data Output</th>
+    <th>Raw Traffic Data</th>
 </tr>
 {{#each paths}}
     <tr>
     <td>
-        <a href="{{ baseurl }}/chart?{{@key}}">
-            {{@key}}
-        </a>
+            {{this.Id}}
     </td>
     <td>
-        <a href="{{ baseurl }}/chart?{{@key}}">
             {{this.linkName}}
+    </td>
+    <td>
+            {{this.Borough}}
+    </td>
+    <td>
+            {{this.DataAsOf}}
+    </td>
+    <td>
+        <a href="{{ ../baseurl }}/chart?{{this.Id}}">
+            /chart?{{this.Id}}
         </a>
     </td>
     <td>
-        <a href="{{ baseurl }}/chart?{{@key}}">
-            {{this.Borough}}
+        <a href="{{ ../baseurl }}/data/{{this.Id}}">
+            /data/{{this.Id}}
         </a>
     </td>
+    <td>
+        <a href="{{ ../htmEngineServerUrl }}/{{this.Id}}">
+            {{ ../htmEngineServerUrl }}/{{this.Id}} ⤤
+        </a>
+    </td>
+    <td>
+        <a href="{{ ../dataSourceUrl }}/{{this.Id}}">
+            {{ ../dataSourceUrl }}/{{this.Id}} ⤤
+        </a>
+    </td>
+
     </tr>
 {{/each}}
 </tbody>

@@ -1,7 +1,14 @@
 body {
-    margin: 20px 40px;
+    margin: 30px 50px;
 }
 
 table td, table th {
     padding: 0 10px;
+}
+
+#absolute-home {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 6px;
 }

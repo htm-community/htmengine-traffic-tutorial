@@ -1,12 +1,25 @@
 var url = require('url')
   , qs = require('querystring')
-  , moment = require('moment')
+  , moment = require('moment-timezone')
   , _ = require('lodash')
   , async = require('async')
+
+  , jsonUtils = require('./json')
+
+  , DATE_FORMAT = 'YYYY/MM/DD HH:mm:ss'
+  , TZ = "America/New_York"
+
   , htmEngineClient
+  , trafficDataClient
   , pathIds
   , pathDetails
+  , anomalyThreshold = require('../conf/config').anomalyThreshold
   ;
+
+function timestampToMomentWithZone(ts, zone) {
+    var ts = parseInt(ts);
+    return moment.tz(ts * 1000, zone);
+}
 
 function respondInCsv(data, headers, res) {
     var csv = '';
@@ -16,7 +29,8 @@ function respondInCsv(data, headers, res) {
     _.each(data, function(pathData, index) {
         var rowOut = _.map(headers, function(key) {
             if (key == 'timestamp') {
-                return moment(new Date(parseInt(pathData[key]) * 1000));
+                return timestampToMomentWithZone(pathData[key], TZ)
+                                                .format(DATE_FORMAT);
             } else {
                 return pathData[key];
             }
@@ -39,14 +53,19 @@ function getPathData(req, res) {
     });
 }
 
-function getAllAnomalies(req, res) {
+function fetchPathData(pathIds, callback) {
     var dataFetchers = {};
     _.each(pathIds, function(id) {
-        dataFetchers[id] = function(callback) {
-            htmEngineClient.getData(id, callback);
+        console.log(id);
+        dataFetchers[id] = function(localCallback) {
+            htmEngineClient.getData(id, localCallback);
         };
     });
-    async.parallel(dataFetchers, function(err, pathData) {
+    async.parallel(dataFetchers, callback);
+}
+
+function getAllAnomalies(req, res) {
+    fetchPathData(pathIds, function(err, pathData) {
         var keys
           , matrix = {};
 
@@ -77,7 +96,8 @@ function getAllAnomalies(req, res) {
 
         _.each(_.keys(matrix).sort(), function(ts) {
             var dataRow = matrix[ts]
-              , date = new Date(ts * 1000);
+              , date = timestampToMomentWithZone(ts, TZ).format(DATE_FORMAT)
+              ;
             res.write([date].concat(dataRow).join(',') + '\n');
         });
         
@@ -86,13 +106,7 @@ function getAllAnomalies(req, res) {
 }
 
 function getAnomalyAverage(req, res) {
-    var dataFetchers = {};
-    _.each(pathIds, function(id) {
-        dataFetchers[id] = function(callback) {
-            htmEngineClient.getData(id, callback);
-        };
-    });
-    async.parallel(dataFetchers, function(err, pathData) {
+    fetchPathData(pathIds, function(err, pathData) {
         var keys
           , timeKeys
           , matrix = {};
@@ -120,18 +134,18 @@ function getAnomalyAverage(req, res) {
         res.setHeader('Content-Type', 'text');
 
         // Write header row
-        res.write('timestamp, average anomaly score\n');
+        res.write('timestamp, average anomaly score,over threshold\n');
 
         timeKeys = _.keys(matrix).sort()
 
         _.each(timeKeys, function(ts) {
             var dataRow = matrix[ts]
-              , date = moment(new Date(ts * 1000))
-              , tenBefore = moment(date).subtract(15, 'minutes')
-              , tenAfter = moment(date).add(15, 'minutes')
-              // , timeWindow
+              , date = timestampToMomentWithZone(ts)
+              , tenBefore = moment(date).subtract(5, 'minutes')
+              , tenAfter = moment(date).add(5, 'minutes')
               , anomalySum = 0
               , valueCount = 0
+              , overThreshhold = []
               , averageAnomaly
               ;
 
@@ -142,13 +156,20 @@ function getAnomalyAverage(req, res) {
                         if (value !== undefined) {
                             valueCount++;
                             anomalySum += value;
+                            if (value > 0.9) {
+                                overThreshhold.push(value);
+                            }
                         }
                     });
                 }
             });
 
             averageAnomaly = anomalySum / valueCount;
-            res.write(date.format() + ',' + averageAnomaly + '\n');
+            res.write(
+                date.format(DATE_FORMAT) + ',' 
+                + averageAnomaly + ',' 
+                + overThreshhold.length + '\n'
+            );
 
         });
         
@@ -156,14 +177,23 @@ function getAnomalyAverage(req, res) {
     });
 }
 
-function init(client, ids, details) {
-    htmEngineClient = client;
+function getPathDetails(req, res) {
+    trafficDataClient.getPaths(function(err, data) {
+        if (err) return jsonUtils.renderErrors([err], res);
+        jsonUtils.render(data, res);
+    });
+}
+
+function init(htmClient, trafficClient, ids, details) {
+    htmEngineClient = htmClient;
+    trafficDataClient = trafficClient;
     pathIds = ids;
     pathDetails = details
     return {
         getPathData: getPathData
       , getAllAnomalies: getAllAnomalies
       , getAnomalyAverage: getAnomalyAverage
+      , getPathDetails: getPathDetails
     };
 }
 

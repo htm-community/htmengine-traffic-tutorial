@@ -1,50 +1,34 @@
 var _ = require('lodash')
   , async = require('async')
-  , moment = require('moment')
+  , moment = require('moment-timezone')
   , MIN_SPEED = 0
   , MAX_SPEED = 80
   , PRIMER_LIMIT = 5000
   , ASYNC_MAX = 20
+  , TZ = "America/New_York"
   ;
 
-function timeStringToMoment(timeIn) {
-    // 2015-06-29T14:22:49
-    var dateString = timeIn.split('T').shift()
-      , timeString = timeIn.split('T').pop()
-      , datePieces = dateString.split('-')
-      , timePieces = timeString.split(':')
-      , timeObject = {}
-      ;
-
-    timeObject.year = parseInt(datePieces.shift())
-    timeObject.month = parseInt(datePieces.shift()) - 1
-    timeObject.day = parseInt(datePieces.shift())
-    timeObject.hour = parseInt(timePieces.shift())
-    timeObject.minute = parseInt(timePieces.shift())
-    timeObject.second = parseInt(timePieces.shift())
-
-    return moment(timeObject)
-}
-
-function timeStringToMoment_2(timeIn) {
-    // 6/29/2015 16:42:48
+function dateStringToMomentWithZone(timeIn, zone) {
+    // 2015/06/08 00:03:54
     var dateString = timeIn.split(' ').shift()
       , timeString = timeIn.split(' ').pop()
       , datePieces = dateString.split('/')
       , timePieces = timeString.split(':')
       , timeObject = {}
+      , timeOut
       ;
 
+    timeObject.year = parseInt(datePieces.shift())
     timeObject.month = parseInt(datePieces.shift()) - 1
     timeObject.day = parseInt(datePieces.shift())
-    timeObject.year = parseInt(datePieces.shift())
-    timeObject.hour = parseInt(timePieces.shift())
-    timeObject.minute = parseInt(timePieces.shift())
-    timeObject.second = parseInt(timePieces.shift())
+    timeObject.hour = parseInt(timePieces.shift());
+    timeObject.minute = parseInt(timePieces.shift());
+    timeObject.second = parseInt(timePieces.shift());
 
-    return moment(timeObject)
+    timeOut = moment.tz(timeObject, zone);
+
+    return timeOut;
 }
-
 
 function TrafficPusher(config) {
     this.trafficDataClient = config.trafficDataClient;
@@ -63,8 +47,9 @@ TrafficPusher.prototype.init = function(maxPaths, callback) {
         // is older than a month, we'll remove it from the path ids so it doesn't
         // get processed.
         _.each(pathDetails.paths, function(details, id) {
-            var date = timeStringToMoment_2(details.DataAsOf)
-              , monthAgo = moment(new Date()).subtract(1, 'month')
+            var dateString = details.DataAsOf
+              , date = dateStringToMomentWithZone(dateString, TZ)
+              , monthAgo = date.subtract(1, 'month')
               ;
             if (date < monthAgo) {
                 console.log('Suppressing path %s because of old data', id);
@@ -110,17 +95,19 @@ TrafficPusher.prototype.fetch = function(callback) {
                 var params = {};
                 if (lastUpdated[id]) {
                     // Only get data we haven't seen yet.
-                    params.since = parseInt(lastUpdated[id]) + 1;
+                    params.since = parseInt(lastUpdated[id]);
                 } else {
                     // If this is the first data fetch, get only some rows.
                     params.limit = PRIMER_LIMIT;
                 }
+                // Get complete path data for one route.
                 me.trafficDataClient.getPath(id, params, function(err, allPaths) {
                     var htmPosters = [];
                     _.each(allPaths.path, function(pathData) {
                         htmPosters.push(function(htmCallback) {
-                            var timestamp = 
-                                timeStringToMoment(pathData.DataAsOf).unix();
+                            var timestamp = dateStringToMomentWithZone(
+                                pathData.DataAsOf, TZ
+                            ).unix();
                             me.htmEngineClient.postData(
                                 id, pathData.Speed, timestamp, htmCallback
                             );

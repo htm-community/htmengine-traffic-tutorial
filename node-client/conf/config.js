@@ -9,6 +9,7 @@ module.exports = {
     // dataServer: 'http://localhost:8081'
 
   , interval: '10 minutes'
+  , anomalyThreshhold: 0.99
 
     // This helps for debugging without pulling in the entire dataset.
   , maxPaths: 0
