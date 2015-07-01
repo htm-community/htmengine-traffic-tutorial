@@ -3,17 +3,23 @@ title: HTM Engine Traffic Tutorial
 layout: main.hbt
 ---
 
-{{#each paths}}
-    <div id="chart-{{this.Id}}"></div>
-{{/each}}
+<div id="title">
+    <h1>All Traffic Routes</h1>
+</div>
 
 <script type="text/javascript">
+
     $(function() {
-        var $body = $('div#main')
-          , docWidth = $(document).width();
-        
-        function goChart(id) {
+        var docWidth = $(document).width();
+
+        function goChart(id, details) {
             var csvPath = "/data/" + id;
+
+            $('#title').after(
+                "<h4>" + id + "</h4>"
+              + "<div id='chart-" + id + "'></div>"
+            );
+
             new Dygraph(
                 document.getElementById("chart-" + id)
               , csvPath
@@ -84,9 +90,31 @@ layout: main.hbt
             );
         };
 
-        {{#each paths}}
-            goChart({{this.Id}});
-        {{/each}}
+        // Read a page's GET URL variables and return them as an associative array.
+        function getUrlVars() {
+            var vars = [], hash;
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for(var i = 0; i < hashes.length; i++) {
+                hash = hashes[i].split('=');
+                vars.push(hash[0]);
+                vars[hash[0]] = hash[1];
+            }
+            return vars;
+        }
+
+        var query = {
+            borough: getUrlVars()['borough']
+        };
+        if (query.borough) {
+            query.borough = query.borough.replace('%20',' ')
+            $('#title h1').html(query.borough);
+        }
+
+        $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
+            _.each(data.paths, function(pathData, pathId) {
+                goChart(pathId, pathData);
+            });
+        });
 
     });
 </script>

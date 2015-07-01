@@ -25,8 +25,6 @@
     <script type="text/javascript">
         function initialize() {
 
-            // $('#title h1').html('All Routes');
-
             // Read a page's GET URL variables and return them as an associative array.
             function getUrlVars() {
                 var vars = [], hash;
@@ -77,6 +75,10 @@
                 return validNumbers && validPoint;
             }
 
+
+            if (query.borough) {
+                $('#title h1').html(query.borough);
+            }
 
             $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
                 _.each(data.paths, function(pathData, pathId) {
@@ -157,7 +159,7 @@
   <body>
     <div id="title">
         <h1>All Routes</h1>
-        <h2><a href="{{ baseurl }}">HOME</a></h2>
+        <h4><a href="{{ baseurl }}">HOME</a></h4>
         <p>Each route has a marker at its first point. Click it to get more details.</p>
     </div>
     <div id="map-canvas"></div>

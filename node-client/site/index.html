@@ -11,22 +11,32 @@ layout: main.hbt
 
 <h2>Boroughs</h2>
 
-<p/>I'm planning on separating the traffic paths by borough, but I haven't done it yet. 
-
-<ul>
+<table>
+<tbody>
 {{#each boroughs}}
-    <li>
+    <tr>
+    <td>
+        {{this}}
+    </td>
+    <td>
         <a href="{{ ../baseurl }}/map?borough={{this}}">
-            {{this}}
+            map
         </a>
-    </li>
+    </td>
+    <td>
+        <a href="{{ ../baseurl }}/_charts?borough={{this}}">
+            chart
+        </a>
+    </td>
+    </tr>
 {{/each}}
-</ul>
+</tbody>
+</table>
 
 <h2>Traffic Paths</h2>
 
-<table>
-<tbody>
+<table id="traffic_paths" class="tablesorter">
+<thead>
 <tr>
     <th>ID</th>
     <th>Approximate Address</th>
@@ -37,6 +47,8 @@ layout: main.hbt
     <th>HTM Engine Data Output</th>
     <th>Raw Traffic Data</th>
 </tr>
+</thead>
+<tbody>
 {{#each paths}}
     <tr>
     <td>
@@ -76,3 +88,10 @@ layout: main.hbt
 {{/each}}
 </tbody>
 </table>
+
+<script>
+$(document).ready(function() { 
+    $("#traffic_paths").tablesorter(); 
+}); 
+
+</script>
