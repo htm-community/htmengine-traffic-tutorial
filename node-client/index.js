@@ -9,10 +9,10 @@ var path = require('path')
   , HtmEngineClient = require('./lib/htm-engine-client')
   , ajaxInitializer = require('./lib/ajax-data-handler')
   , config = require('./conf/config')
-  
+
   , htmEngineServerUri = 'http://localhost:8080'
   , dataServerUri = config.dataServer
-  
+
   , ajaxRequestHandlers
   , trafficDataClient
   , htmEngineClient
@@ -58,6 +58,7 @@ trafficPusher.init(maxPaths, function(err, pathIds, pathDetails) {
     app.use(express.static('build'));
     app.use('/data/anomalies', ajaxRequestHandlers.getAllAnomalies);
     app.use('/data/anomalyAverage', ajaxRequestHandlers.getAnomalyAverage);
+    app.use('/data/anomalyAbove', ajaxRequestHandlers.getPathsWithAnomaliesAbove);
     app.use('/data/pathDetails', ajaxRequestHandlers.getPathDetails);
     app.use('/data/:pathId', ajaxRequestHandlers.getPathData);
     app.listen(config.port, function(error) {

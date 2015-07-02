@@ -42,8 +42,9 @@ function respondInCsv(data, headers, res) {
 }
 
 function getPathData(req, res) {
-    var pathId = req.params.pathId;
-    htmEngineClient.getData(pathId, function(err, data) {
+    var pathId = req.params.pathId
+      , query = req.query || {};
+    getOnePathData(pathId, query, function(err, data) {
         if (err) {
             res.statusCode = 400;
             res.end(err.message);
@@ -53,26 +54,50 @@ function getPathData(req, res) {
     });
 }
 
-function fetchPathData(pathIds, callback) {
-    var dataFetchers = {};
+function getOnePathData(id, query, callback) {
+    htmEngineClient.getData(id, function(err, pathData) {
+        var filtered;
+        if (err) return callback(err);
+        // Apply time filters
+        if (_.keys(query).length) {
+            filtered = _.filter(pathData, function(point) {
+                // console.log(
+                //     '%s\t%s\t%s'
+                //   , moment.tz(query.since*1000, TZ).format()
+                //   , moment.tz(point.timestamp*1000, TZ).format()
+                //   , moment.tz(query.until*1000, TZ).format()
+                // );
+                var match = (
+                    (! query.since || point.timestamp > query.since)
+                 && (! query.until || point.timestamp < query.until)
+                );
+                // console.log(match);
+                return match;
+            });
+        } else {
+            filtered = pathData;
+        }
+        callback(null, filtered);
+    });
+}
+
+function getAllPathData(pathIds, query, callback) {
+    var dataFetchers = {}
+      , borough = query.borough;
     _.each(pathIds, function(id) {
-        dataFetchers[id] = function(localCallback) {
-            htmEngineClient.getData(id, localCallback);
-        };
+        if (! borough || borough.toLowerCase() == pathDetails[id].Borough.toLowerCase()) {
+            dataFetchers[id] = function(localCallback) {
+                getOnePathData(id, query, localCallback);
+            };
+        }
     });
     async.parallel(dataFetchers, callback);
 }
 
-function filterPathIdsByBorough(ids, borough) {
-    if (! borough) return ids;
-    return _.filter(ids, function(id) {
-        return pathDetails[id].Borough.toLowerCase() == borough.toLowerCase();
-    });
-}
-
 function getAllAnomalies(req, res) {
-    var paths = filterPathIdsByBorough(pathIds, req.query.borough);
-    fetchPathData(paths, function(err, pathData) {
+    getAllPathData(pathIds, {
+        borough: req.query.borough
+    }, function(err, pathData) {
         var keys
           , matrix = {};
 
@@ -99,22 +124,23 @@ function getAllAnomalies(req, res) {
         res.setHeader('Content-Type', 'text');
 
         // Write header row
-        res.write(['timestamp'].concat(keys).join(',') + '\n');
+        res.write(['timestamp'].concat(keys).join(',') + ',dummy\n');
 
         _.each(_.keys(matrix).sort(), function(ts) {
             var dataRow = matrix[ts]
               , date = timestampToMomentWithZone(ts, TZ).format(DATE_FORMAT)
               ;
-            res.write([date].concat(dataRow).join(',') + '\n');
+            res.write([date].concat(dataRow).join(',') + ',\n');
         });
-        
+
         res.end();
     });
 }
 
 function getAnomalyAverage(req, res) {
-    var paths = filterPathIdsByBorough(pathIds, req.query.borough);
-    fetchPathData(paths, function(err, pathData) {
+    getAllPathData(pathIds, {
+        borough: req.query.borough
+    }, function(err, pathData) {
         var keys
           , timeKeys
           , matrix = {};
@@ -148,9 +174,9 @@ function getAnomalyAverage(req, res) {
 
         _.each(timeKeys, function(ts) {
             var dataRow = matrix[ts]
-              , date = timestampToMomentWithZone(ts)
-              , tenBefore = moment(date).subtract(5, 'minutes')
-              , tenAfter = moment(date).add(5, 'minutes')
+              , date = timestampToMomentWithZone(ts, TZ)
+              , before = moment(date).subtract(5, 'minutes')
+              , after = moment(date).add(5, 'minutes')
               , anomalySum = 0
               , valueCount = 0
               , overThreshhold = []
@@ -158,8 +184,8 @@ function getAnomalyAverage(req, res) {
               ;
 
             _.each(timeKeys, function(windowTimestamp) {
-                if (tenBefore.unix() < windowTimestamp 
-                && windowTimestamp < tenAfter.unix()) {
+                if (before.unix() < windowTimestamp
+                && windowTimestamp < after.unix()) {
                     _.each(matrix[windowTimestamp], function(value) {
                         if (value !== undefined) {
                             valueCount++;
@@ -174,13 +200,13 @@ function getAnomalyAverage(req, res) {
 
             averageAnomaly = anomalySum / valueCount;
             res.write(
-                date.format(DATE_FORMAT) + ',' 
-                + averageAnomaly + ',' 
+                date.format(DATE_FORMAT) + ','
+                + averageAnomaly + ','
                 + overThreshhold.length + '\n'
             );
 
         });
-        
+
         res.end();
     });
 }
@@ -188,13 +214,23 @@ function getAnomalyAverage(req, res) {
 function getPathDetails(req, res) {
     trafficDataClient.getPaths(function(err, data) {
         if (err) return jsonUtils.renderErrors([err], res);
-        // filter boroughs if necessary
+        // filter by id and/or borough if necessary
         var doomed = []
-          , borough;
-        if (req.query && req.query.borough) {
+          , borough
+          , targetIds = [];
+        if (req.query.id) {
+            if (req.query.id.indexOf(',')) {
+                targetIds = req.query.id.split(',');
+            } else {
+                targetIds.push(req.query.id);
+            }
+        }
+        if (req.query) {
             borough = req.query.borough;
             _.each(data.paths, function(details, id) {
-                if (details.Borough.toLowerCase() != borough.toLowerCase()) {
+                if (borough && details.Borough.toLowerCase() != borough.toLowerCase()) {
+                    doomed.push(id);
+                } else if (! _.contains(targetIds, id)) {
                     doomed.push(id);
                 }
             });
@@ -204,6 +240,41 @@ function getPathDetails(req, res) {
             data.count -= doomed.length;
         }
         jsonUtils.render(data, res);
+    });
+}
+
+function getPathsWithAnomaliesAbove(req, res) {
+    var score = req.query.threshold
+      , paths = {}
+      , out = []
+      ;
+    getAllPathData(pathIds, req.query, function(err, pathData) {
+        _.each(pathData, function(data, id) {
+            _.each(data, function(point) {
+                var ts = point.timestamp
+                  , anomaly = point.anomaly
+                  ;
+                if (anomaly > parseFloat(score)) {
+                    if (! paths[id]) {
+                        paths[id] = 0;
+                    }
+                    paths[id] = paths[id] + 1;
+                }
+            });
+        });
+
+        _.each(paths, function(count, id) {
+            out.push({
+                id: id
+              , count: count
+            });
+        });
+
+        out = _.sortBy(out, function(item) {
+            return item.count;
+        }).reverse();
+
+        jsonUtils.render(out, res);
     });
 }
 
@@ -217,6 +288,7 @@ function init(htmClient, trafficClient, ids, details) {
       , getAllAnomalies: getAllAnomalies
       , getAnomalyAverage: getAnomalyAverage
       , getPathDetails: getPathDetails
+      , getPathsWithAnomaliesAbove: getPathsWithAnomaliesAbove
     };
 }
 

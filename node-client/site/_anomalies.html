@@ -15,7 +15,7 @@ layout: main.hbt
         var $body = $('div#main')
           , docWidth = $(document).width()
           , csvPath = "/data/anomalies"
-        
+
         // Read a page's GET URL variables and return them as an associative array.
         function getUrlVars() {
             var vars = [], hash;
@@ -40,12 +40,13 @@ layout: main.hbt
         new Dygraph(
             document.getElementById("graphdiv")
           , csvPath
-          , { 
+          , {
                 width: docWidth * 0.9
               , height: 600
-              , anomaly: {
-                    axis: {}
-                  , color: "red"
+              , axes: {
+                    y: {
+                        valueRange: [0, 1.1]
+                    }
                 }
               , underlayCallback: function(canvas, area, g) {
                     var red = "rgba(247, 141, 184, 0.5)";
@@ -89,7 +90,7 @@ layout: main.hbt
                             end_x_highlight = max_data_x;
                         }
                         highlight_period(start_x_highlight,end_x_highlight);
-                        // calculate start of highlight for next Saturday 
+                        // calculate start of highlight for next Saturday
                         w += 7*24*3600*1000;
                     }
 

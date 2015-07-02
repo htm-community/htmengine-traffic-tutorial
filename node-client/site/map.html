@@ -46,11 +46,15 @@
             var routes = []
             var query = {
                 borough: getUrlVars()['borough']
+              , id: getUrlVars()['id']
             };
             if (query.borough) {
                 query.borough = query.borough.replace('%20',' ')
                 $('#title h1').html(query.borough);
+            } else if (query.id) {
+                $('#title h1').html('Route ' + query.id);
             }
+
 
             var map = new google.maps.Map(
                 document.getElementById('map-canvas'), mapOptions
@@ -73,8 +77,8 @@
                 var validNumbers = isNumeric(lat) && isNumeric(lon)
                   , validPoint = true;
                 if (validNumbers && closePoint) {
-                    validPoint = Math.abs(closePoint.lat() - Number(lat)) < 0.01 
-                              && Math.abs(closePoint.lng() - Number(lon)) < 0.01 
+                    validPoint = Math.abs(closePoint.lat() - Number(lat)) < 0.01
+                              && Math.abs(closePoint.lng() - Number(lon)) < 0.01
                 }
                 return validNumbers && validPoint;
             }
@@ -120,7 +124,7 @@
                       , title: 'Route ' + pathId
                     });
 
-                    var contentString 
+                    var contentString
                         = '<h3>Route ' + pathId + '</h3>'
                         + '<h4>' + pathData.Borough + '</h4>'
                         + '<p>' + pathData.linkName + '<br/>'

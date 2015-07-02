@@ -4,11 +4,12 @@ layout: main.hbt
 ---
 
 <blockquote>
-    This is the Node.js component of the HTM Engine Traffic Tutorial. It has a web server (you're looking at it right now) that displays anomaly results. It is also a client to an HTM Engine server running in Python. 
+    This is the Node.js component of the HTM Engine Traffic Tutorial. It has a web server (you're looking at it right now) that displays anomaly results. It is also a client to an HTM Engine server running in Python.
 </blockquote>
 
 <h2><a href="{{ ../baseurl }}/map/" taret="_blank">All Traffic Paths Mapped</a></h2>
 <h2><a href="{{ ../baseurl }}/_charts/" taret="_blank">All Traffic Paths Charted</a></h2>
+<h2><a href="{{ ../baseurl }}/investigate/" taret="_blank">Search for Anomalies</a></h2>
 
 <h2>Boroughs</h2>
 
@@ -20,22 +21,22 @@ layout: main.hbt
         {{this}}
     </td>
     <td>
-        <a href="{{ ../baseurl }}/map?borough={{this}}">
+        <a href="{{ ../baseurl }}/map/?borough={{this}}">
             map
         </a>
     </td>
     <td>
-        <a href="{{ ../baseurl }}/_charts?borough={{this}}">
+        <a href="{{ ../baseurl }}/charts/?borough={{this}}">
             all charts
         </a>
     </td>
     <td>
-        <a href="{{ ../baseurl }}/_anomalies?borough={{this}}">
+        <a href="{{ ../baseurl }}/_anomalies/?borough={{this}}">
             combined anomaly chart (long load)
         </a>
     </td>
     <td>
-        <a href="{{ ../baseurl }}/_averageAnomaly?borough={{this}}">
+        <a href="{{ ../baseurl }}/_averageAnomaly/?borough={{this}}">
             avg anomaly chart (long load)
         </a>
     </td>
@@ -56,6 +57,7 @@ layout: main.hbt
     <th>Borough</th>
     <th>Data As Of (NYC time)</th>
     <th>Chart</th>
+    <th>Map</th>
     <th>CSV</th>
     <th>HTM Engine Data Output</th>
     <th>Raw Traffic Data</th>
@@ -77,8 +79,13 @@ layout: main.hbt
             {{this.DataAsOf}}
     </td>
     <td>
-        <a href="{{ ../baseurl }}/chart?{{this.Id}}">
-            /chart?{{this.Id}}
+        <a href="{{ ../baseurl }}/charts/?id={{this.Id}}">
+            /charts/?id={{this.Id}}
+        </a>
+    </td>
+    <td>
+        <a href="{{ ../baseurl }}/map?id={{this.Id}}">
+            /map?id={{this.Id}}
         </a>
     </td>
     <td>
@@ -103,8 +110,8 @@ layout: main.hbt
 </table>
 
 <script>
-$(document).ready(function() { 
-    $("#traffic_paths").tablesorter(); 
-}); 
+$(document).ready(function() {
+    $("#traffic_paths").tablesorter();
+});
 
 </script>

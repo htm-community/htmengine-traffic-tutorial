@@ -1,0 +1,16 @@
+<h3>Anomalous Routes</h3>
+
+<p>The following routes had anomaly scores above the specified threshold during the specified time period.</p>
+
+<p>Click <a href="{{plotLink}}" target="_blank">here</a> to plot them all.</p>
+<p>Click <a href="{{mapLink}}" target="_blank">here</a> to map them all.</p>
+
+<ul>
+{{#each routes}}
+    <li>
+        <a href="{{ ../baseurl }}/charts/?id={{this.id}}&{{../linkParams}}">
+        {{this.id}} had {{this.count}} points over the anomaly threshold
+        </a>
+    </li>
+{{/each}}
+</ul>

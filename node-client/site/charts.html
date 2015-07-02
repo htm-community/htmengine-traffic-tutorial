@@ -3,7 +3,7 @@ title: HTM Engine Traffic Tutorial
 layout: main.hbt
 ---
 
-<!-- <script src="{{baseurl}}/bower_components/dygraphs/extras/synchronizer.js"></script> -->
+<script src="{{baseurl}}/bower_components/dygraphs/extras/synchronizer.js"></script>
 
 
 <style>
@@ -22,7 +22,7 @@ layout: main.hbt
 </style>
 
 <div id="title">
-    <h1>All Traffic Routes</h1>
+    <h2>All Traffic Routes</h2>
 </div>
 
 <table class="charts">
@@ -35,27 +35,50 @@ layout: main.hbt
 
     $(function() {
 
+        function getJsonFromUrl() {
+            var query = location.search.substr(1);
+            var result = {};
+            query.split("&").forEach(function(part) {
+                var item = part.split("=");
+                result[item[0]] = decodeURIComponent(item[1]);
+            });
+            return result;
+        }
+
         var graphs = [];
+        var query = getJsonFromUrl();
 
         function goChart(id, details) {
-            var csvPath = "/data/" + id;
+            var csvPath;
 
             $('table.charts tbody').append(
                 "<tr><td class='left'>"
-              + "<a href='{{ baseurl }}/chart?" + id + "'>" + id + "</a><br/>" + details.linkName
-              + "</td><td class='right' id='container-" + id + "'>" 
+              + "<a href='{{ baseurl }}/chart?" + id + "'>" + id + "</a> "
+              + "(" + details.Borough + ")"
+              + "<br/>" + details.linkName
+              + "</td><td class='right' id='container-" + id + "'>"
               + "<div id='chart-" + id + "'></div>"
               + "</td></tr>"
             );
 
+            csvPath = '/data/' + id + '?' + $.param(query);
+
             graphs.push(new Dygraph(
                 document.getElementById("chart-" + id)
               , csvPath
-              , { 
+              , {
                     anomaly: {
                         axis: {}
                       , color: "red"
                     }
+                  , axes: {
+                      y: {
+                          valueRange: [0, 80]
+                      }
+                    , y2: {
+                          valueRanges: [0, 1.1]
+                      }
+                  }
                   , width: $('#container-' + id).width()
                   , height: 120
                   , underlayCallback: function(canvas, area, g) {
@@ -101,7 +124,7 @@ layout: main.hbt
                                 end_x_highlight = max_data_x;
                             }
                             highlight_period(start_x_highlight,end_x_highlight);
-                            // calculate start of highlight for next Saturday 
+                            // calculate start of highlight for next Saturday
                             w += 7*24*3600*1000;
                         }
                     }
@@ -109,34 +132,22 @@ layout: main.hbt
             ));
         };
 
-        // Read a page's GET URL variables and return them as an associative array.
-        function getUrlVars() {
-            var vars = [], hash;
-            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-            for(var i = 0; i < hashes.length; i++) {
-                hash = hashes[i].split('=');
-                vars.push(hash[0]);
-                vars[hash[0]] = hash[1];
-            }
-            return vars;
-        }
 
-        var query = {
-            borough: getUrlVars()['borough']
-        };
         if (query.borough) {
             query.borough = query.borough.replace('%20',' ')
             $('#title h1').html(query.borough);
+        } else if (query.id) {
+            $('#title h1').html('Route ' + query.id);
         }
 
         $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
             _.each(data.paths, function(pathData, pathId) {
                 goChart(pathId, pathData);
             });
-            // var sync = Dygraph.synchronize(graphs, {
-            //     selection: false,
-            //     zoom: true
-            // });
+            var sync = Dygraph.synchronize(graphs, {
+                selection: false
+              , zoom: true
+            });
         });
 
     });
