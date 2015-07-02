@@ -3,38 +3,61 @@ title: HTM Engine Traffic Tutorial
 layout: main.hbt
 ---
 
+<!-- <script src="{{baseurl}}/bower_components/dygraphs/extras/synchronizer.js"></script> -->
+
+
+<style>
+    table {
+        width: 100%;
+    }
+    table td {
+        padding: 0;
+    }
+    table td.left {
+        width: 20%;
+    }
+    table td.right {
+        width: 80%;
+    }
+</style>
+
 <div id="title">
     <h1>All Traffic Routes</h1>
 </div>
 
+<table class="charts">
+<tbody>
+
+</tbody>
+</table>
+
 <script type="text/javascript">
 
     $(function() {
-        var docWidth = $(document).width();
+
+        var graphs = [];
 
         function goChart(id, details) {
             var csvPath = "/data/" + id;
 
-            $('#title').after(
-                "<table><tbody>"
-              + "<tr><td>"
-              + id + "<br/>" + details.linkName
-              + "</td><td>" 
+            $('table.charts tbody').append(
+                "<tr><td class='left'>"
+              + "<a href='{{ baseurl }}/chart?" + id + "'>" + id + "</a><br/>" + details.linkName
+              + "</td><td class='right' id='container-" + id + "'>" 
               + "<div id='chart-" + id + "'></div>"
               + "</td></tr>"
-              + "</tbody></table>"
             );
 
-            new Dygraph(
+            graphs.push(new Dygraph(
                 document.getElementById("chart-" + id)
               , csvPath
               , { 
-                    width: docWidth * 0.8
-                  , height: 100
-                  , anomaly: {
+                    anomaly: {
                         axis: {}
                       , color: "red"
                     }
+                  , width: $('#container-' + id).width()
+                  , height: 120
                   , underlayCallback: function(canvas, area, g) {
                         var yellow = "rgba(255, 255, 102, 1.0)";
 
@@ -83,7 +106,7 @@ layout: main.hbt
                         }
                     }
                 }
-            );
+            ));
         };
 
         // Read a page's GET URL variables and return them as an associative array.
@@ -110,6 +133,10 @@ layout: main.hbt
             _.each(data.paths, function(pathData, pathId) {
                 goChart(pathId, pathData);
             });
+            // var sync = Dygraph.synchronize(graphs, {
+            //     selection: false,
+            //     zoom: true
+            // });
         });
 
     });
