@@ -8,9 +8,9 @@
 <ul>
 {{#each routes}}
     <li>
-        <a href="{{ ../baseurl }}/charts/?id={{this.id}}&{{../linkParams}}">
-        {{this.id}} had {{this.count}} points over the anomaly threshold
-        </a>
+        <a href="{{ ../baseurl }}/charts/?id={{this.id}}&{{../linkParams}}" target="_blank">
+        {{this.id}}</a> had {{this.count}} points over the anomaly threshold
+
     </li>
 {{/each}}
 </ul>

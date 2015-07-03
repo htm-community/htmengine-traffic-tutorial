@@ -53,7 +53,9 @@ layout: main.hbt
 
             $('table.charts tbody').append(
                 "<tr><td class='left'>"
-              + "<a href='{{ baseurl }}/chart?" + id + "'>" + id + "</a> "
+              + "<a href='{{ baseurl }}/map?id=" + id + "' target='_blank'>"
+              + id
+              + "</a> "
               + "(" + details.Borough + ")"
               + "<br/>" + details.linkName
               + "</td><td class='right' id='container-" + id + "'>"

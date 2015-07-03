@@ -93,13 +93,15 @@ layout: main.hbt
 
 <script type="text/javascript">
 
+    moment.tz.setDefault("America/New_York");
+
     $(function() {
 
         var since = $('#since').datetimepicker({
-            defaultDate: moment().tz("America/New_York").subtract(1, 'day')
+            defaultDate: moment().subtract(1, 'day')
         }).data("DateTimePicker");
         var until = $('#until').datetimepicker({
-            defaultDate: moment().tz("America/New_York")
+            defaultDate: moment()
         }).data("DateTimePicker");
         var template;
 
