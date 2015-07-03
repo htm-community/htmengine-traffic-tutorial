@@ -18,12 +18,19 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="{{baseurl}}/bower_components/lodash/lodash.min.js"></script>
+    <script src="{{baseurl}}/bower_components/handlebars/handlebars.min.js"></script>
 
     <script type="text/javascript"
       src="https://maps.googleapis.com/maps/api/js?key={{ googleApiKey }}">
     </script>
     <script type="text/javascript">
         function initialize() {
+
+            var markerTemplate;
+
+            $.get('{{ baseurl }}/templates/markerLabel.hbt', function(response) {
+                markerTemplate = response;
+            });
 
             // Read a page's GET URL variables and return them as an associative array.
             function getUrlVars() {
@@ -124,13 +131,12 @@
                       , title: 'Route ' + pathId
                     });
 
-                    var contentString
-                        = '<h3>Route ' + pathId + '</h3>'
-                        + '<h4>' + pathData.Borough + '</h4>'
-                        + '<p>' + pathData.linkName + '<br/>'
-                        + '<a href="{{ baseurl }}/chart?' + pathId + '">chart</a>'
-                        + '</p>'
-                        ;
+                    var contentString = Handlebars.compile(markerTemplate)({
+                        id: pathId
+                      , borough: pathData.Borough
+                      , address: pathData.linkName
+                      , baseurl: "{{ baseurl }}"
+                    });
 
                     var infowindow = new google.maps.InfoWindow({
                         content: contentString

@@ -1,0 +1,4 @@
+<h3>Traffic Route {{ id }}</h3>
+<h4>{{ borough }}</h4>
+<p>{{ address }}</p>
+<a href="{{ baseurl }}/charts/?id={{ id }}">chart</a>
