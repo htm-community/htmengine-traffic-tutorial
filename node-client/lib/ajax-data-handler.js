@@ -213,33 +213,36 @@ function getAnomalyAverage(req, res) {
 
 function getPathDetails(req, res) {
     trafficDataClient.getPaths(function(err, data) {
+        var paths = {}
+          , borough = ''
+          , ids = [];
         if (err) return jsonUtils.renderErrors([err], res);
-        // filter by id and/or borough if necessary
-        var doomed = []
-          , borough
-          , targetIds = [];
-        if (req.query.id) {
-            if (req.query.id.indexOf(',')) {
-                targetIds = req.query.id.split(',');
-            } else {
-                targetIds.push(req.query.id);
+
+        if (req.query.id || req.query.borough) {
+            if (req.query.id) {
+                if (req.query.id.indexOf(',')) {
+                    ids = req.query.id.split(',');
+                }
             }
-        }
-        if (req.query) {
-            borough = req.query.borough;
+            if (req.query.borough) {
+                borough = req.query.borough.toLowerCase();
+            }
             _.each(data.paths, function(details, id) {
-                if (borough && details.Borough.toLowerCase() != borough.toLowerCase()) {
-                    doomed.push(id);
-                } else if (! _.contains(targetIds, id)) {
-                    doomed.push(id);
+                if (ids.indexOf(id) > -1
+                        || details.Borough.toLowerCase() == borough) {
+                    paths[id] = details;
                 }
             });
-            _.each(doomed, function(toRemove) {
-                delete data.paths[toRemove];
+        } else {
+            _.each(data.paths, function(details, id) {
+                paths[id] = details;
             });
-            data.count -= doomed.length;
         }
-        jsonUtils.render(data, res);
+
+        jsonUtils.render({
+            paths: paths
+          , count: _.keys(paths).length
+        }, res);
     });
 }
 

@@ -26,7 +26,8 @@
     <script type="text/javascript">
         function initialize() {
 
-            var markerTemplate;
+            var markerTemplate
+              , pageTitle;
 
             $.get('{{ baseurl }}/templates/markerLabel.hbt', function(response) {
                 markerTemplate = response;
@@ -57,10 +58,13 @@
             };
             if (query.borough) {
                 query.borough = query.borough.replace('%20',' ')
-                $('#title h1').html(query.borough);
+                pageTitle = 'Map of ' + query.borough;
             } else if (query.id) {
-                $('#title h1').html('Route ' + query.id);
+                pageTitle = 'Map of route(s): ' + query.id;
             }
+
+            $('#title h1').html(pageTitle);
+            $('title').html(pageTitle);
 
 
             var map = new google.maps.Map(
@@ -163,7 +167,7 @@
         google.maps.event.addDomListener(window, 'load', initialize);
 
     </script>
-
+    <title></title>
   </head>
   <body>
     <div id="title">
