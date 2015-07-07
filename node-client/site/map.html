@@ -32,12 +32,14 @@
               , pageTitle
               , mapOptions
               , routes
+              , routeMarkers = []
               , markers
               , query
               , map
               , defaultBounds
               , input
               , searchBox
+              , circle
               ;
 
             $.get('{{ baseurl }}/templates/markerLabel.hbt', function(response) {
@@ -108,14 +110,14 @@
                 if (places.length == 0) {
                     return;
                 }
-                for (i = 0, marker; marker = markers[i]; i++) {
+                _.each(markers, function(marker) {
                     marker.setMap(null);
-                }
+                });
 
                 // For each place, get the icon, place name, and location.
                 markers = [];
                 bounds = new google.maps.LatLngBounds();
-                for (i = 0, place; place = places[i]; i++) {
+                _.each(places, function(place) {
                     image = {
                         url: place.icon
                       , size: new google.maps.Size(71, 71)
@@ -135,7 +137,7 @@
                     markers.push(marker);
 
                     bounds.extend(place.geometry.location);
-                }
+                });
 
                 map.fitBounds(bounds);
             });
@@ -144,6 +146,108 @@
             // current map's viewport.
             google.maps.event.addListener(map, 'bounds_changed', function() {
                 searchBox.setBounds(map.getBounds());
+                $('.contextmenu').remove();
+                if (circle) {
+                    circle.setMap(null);
+                }
+            });
+
+            function setMenuXY(currentLatLng) {
+                var mapWidth = $('#map_canvas').width()
+                  , mapHeight = $('#map_canvas').height()
+                  , menuWidth = $('.contextmenu').width()
+                  , menuHeight = $('.contextmenu').height()
+                  , clickedPosition = getCanvasXY(currentLatLng)
+                  , x = clickedPosition.x
+                  , y = clickedPosition.y
+                  ;
+
+                //if to close to the map border, decrease x position
+                if((mapWidth - x ) < menuWidth) {
+                    x = x - menuWidth;
+                }
+                //if to close to the map border, decrease y position
+                if((mapHeight - y ) < menuHeight) {
+                    y = y - menuHeight;
+                }
+
+                $('.contextmenu').css('left',x  );
+                $('.contextmenu').css('top',y );
+            }
+
+            function getCanvasXY(currentLatLng) {
+                var scale = Math.pow(2, map.getZoom())
+                  , nw = new google.maps.LatLng(
+                        map.getBounds().getNorthEast().lat()
+                      , map.getBounds().getSouthWest().lng()
+                    )
+                  , worldCoordinateNW = map.getProjection()
+                                           .fromLatLngToPoint(nw)
+                  , worldCoordinate = map.getProjection()
+                                           .fromLatLngToPoint(currentLatLng)
+                  , currentLatLngOffset = new google.maps.Point(
+                        Math.floor((worldCoordinate.x - worldCoordinateNW.x) * scale),
+                        Math.floor((worldCoordinate.y - worldCoordinateNW.y) * scale)
+                    );
+
+                return currentLatLngOffset;
+            }
+
+            function pointInCircle(point, radius, center) {
+                return (google.maps.geometry.spherical.computeDistanceBetween(point, center) <= radius);
+            }
+
+            function showContextMenu(currentLatLng) {
+                var projection
+                  , contextmenuDir
+                  , searchRadius = (1 / map.getZoom()) * 10000
+                  , nearbyRoutes = []
+                  , plotLink = '{{ baseurl }}/charts/?id='
+                  ;
+                projection = map.getProjection();
+
+                $('.contextmenu').remove();
+
+                if (circle) {
+                    circle.setMap(null);
+                }
+                circle = new google.maps.Circle({
+                    strokeColor: '#FF0000'
+                  , strokeOpacity: 0.8
+                  , strokeWeight: 2
+                  , fillColor: '#FF0000'
+                  , fillOpacity: 0.35
+                  , map: map
+                  , center: currentLatLng
+                  , radius:searchRadius
+                });
+
+                _.each(routeMarkers, function(rte) {
+                    if (pointInCircle(rte.getPosition(), circle.getRadius(), circle.getCenter())) {
+                        nearbyRoutes.push(rte);
+                    }
+                });
+
+                plotLink += _.map(nearbyRoutes, function(marker) {
+                    var title = marker.getTitle()
+                      , id = title.split(/\s+/).pop();
+                    return id;
+                }).join(',');
+
+                contextmenuDir = document.createElement("div");
+                contextmenuDir.className  = 'contextmenu';
+                contextmenuDir.innerHTML =
+                    '<a href="' + plotLink + '" target="_blank">'
+                  + '<div class="context">Chart routes within cirle<\/div>'
+                  + '<\/a>';
+                $(map.getDiv()).append(contextmenuDir);
+                setMenuXY(currentLatLng);
+                contextmenuDir.style.visibility = "visible";
+
+            }
+
+            google.maps.event.addListener(map, "rightclick", function(event){
+                showContextMenu(event.latLng);
             });
 
             function isNumeric(n) {
@@ -175,6 +279,9 @@
                       , coords = []
                       , lastCoord
                       , trafficRoute
+                      , marker
+                      , contentString
+                      , infoWindow
                       ;
                     _.each(linkStrings, function(point) {
                         var points = point.split(',')
@@ -203,21 +310,21 @@
                       , strokeWeight: 5
                     });
 
-                    var marker = new google.maps.Marker({
+                    marker = new google.maps.Marker({
                         position: coords[0]
                       , map: map
                       , animation: google.maps.Animation.DROP
                       , title: 'Route ' + pathId
                     });
 
-                    var contentString = Handlebars.compile(markerTemplate)({
+                    contentString = Handlebars.compile(markerTemplate)({
                         id: pathId
                       , borough: pathData.Borough
                       , address: pathData.linkName
                       , baseurl: "{{ baseurl }}"
                     });
 
-                    var infowindow = new google.maps.InfoWindow({
+                    infowindow = new google.maps.InfoWindow({
                         content: contentString
                     });
 
@@ -230,6 +337,8 @@
                       , line: trafficRoute
                       , details: pathData
                     });
+
+                    routeMarkers.push(marker);
 
                 });
 
