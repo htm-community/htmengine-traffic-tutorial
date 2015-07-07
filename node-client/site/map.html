@@ -2,32 +2,43 @@
 <html>
   <head>
     <link href="{{baseurl}}/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style type="text/css">
-      html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
-      #title {
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
-        background-color: white;
-        border-radius: 3px;
-        border: solid black 3px;
-        padding: 0 20px;
-        z-index: 9999;
-      }
-    </style>
+    <link href="{{baseurl}}/css/map.css" rel="stylesheet">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <script src="{{baseurl}}/bower_components/lodash/lodash.min.js"></script>
     <script src="{{baseurl}}/bower_components/handlebars/handlebars.min.js"></script>
 
     <script type="text/javascript"
-      src="https://maps.googleapis.com/maps/api/js?key={{ googleApiKey }}">
+      src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places&key={{ googleApiKey }}">
     </script>
+    <title></title>
+  </head>
+  <body>
+
+    <div id="title">
+        <h1>All Routes</h1>
+        <h4><a href="{{ baseurl }}">HOME</a></h4>
+        <p>Each route has a marker at its first point. Click it to get more details.</p>
+    </div>
+
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+
+    <div id="map-canvas"></div>
+
     <script type="text/javascript">
         function initialize() {
 
             var markerTemplate
-              , pageTitle;
+              , pageTitle
+              , mapOptions
+              , routes
+              , markers
+              , query
+              , map
+              , defaultBounds
+              , input
+              , searchBox
+              ;
 
             $.get('{{ baseurl }}/templates/markerLabel.hbt', function(response) {
                 markerTemplate = response;
@@ -46,16 +57,18 @@
                 return vars;
             }
 
-            var mapOptions = {
+            mapOptions = {
                 center: { lat: 40.7903, lng: -73.9597},
                 zoom: 11
             };
 
-            var routes = []
-            var query = {
+            routes = [];
+            markers = [];
+            query = {
                 borough: getUrlVars()['borough']
               , id: getUrlVars()['id']
             };
+
             if (query.borough) {
                 query.borough = query.borough.replace('%20',' ')
                 pageTitle = 'Map of ' + query.borough;
@@ -67,9 +80,71 @@
             $('title').html(pageTitle);
 
 
-            var map = new google.maps.Map(
+            map = new google.maps.Map(
                 document.getElementById('map-canvas'), mapOptions
             );
+
+            defaultBounds = new google.maps.LatLngBounds(
+                new google.maps.LatLng(40.5202, -74.2713),
+                new google.maps.LatLng(40.8944, -73.5950));
+            map.fitBounds(defaultBounds);
+
+            input = (document.getElementById('pac-input'));
+            map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+            searchBox = new google.maps.places.SearchBox((input));
+
+            // Listen for the event fired when the user selects an item from the
+            // pick list. Retrieve the matching places for that item.
+            google.maps.event.addListener(searchBox, 'places_changed', function() {
+                var places
+                  , i
+                  , image
+                  , marker
+                  ;
+
+                places = searchBox.getPlaces();
+
+                if (places.length == 0) {
+                    return;
+                }
+                for (i = 0, marker; marker = markers[i]; i++) {
+                    marker.setMap(null);
+                }
+
+                // For each place, get the icon, place name, and location.
+                markers = [];
+                bounds = new google.maps.LatLngBounds();
+                for (i = 0, place; place = places[i]; i++) {
+                    image = {
+                        url: place.icon
+                      , size: new google.maps.Size(71, 71)
+                      , origin: new google.maps.Point(0, 0)
+                      , anchor: new google.maps.Point(17, 34)
+                      , scaledSize: new google.maps.Size(25, 25)
+                    };
+
+                    // Create a marker for each place.
+                    marker = new google.maps.Marker({
+                        map: map
+                      , icon: image
+                      , title: place.name
+                      , position: place.geometry.location
+                    });
+
+                    markers.push(marker);
+
+                    bounds.extend(place.geometry.location);
+                }
+
+                map.fitBounds(bounds);
+            });
+
+            // Bias the SearchBox results towards places that are within the bounds of the
+            // current map's viewport.
+            google.maps.event.addListener(map, 'bounds_changed', function() {
+                searchBox.setBounds(map.getBounds());
+            });
 
             function isNumeric(n) {
                 return !isNaN(parseFloat(n)) && isFinite(n);
@@ -167,14 +242,6 @@
         google.maps.event.addDomListener(window, 'load', initialize);
 
     </script>
-    <title></title>
-  </head>
-  <body>
-    <div id="title">
-        <h1>All Routes</h1>
-        <h4><a href="{{ baseurl }}">HOME</a></h4>
-        <p>Each route has a marker at its first point. Click it to get more details.</p>
-    </div>
-    <div id="map-canvas"></div>
+
   </body>
 </html>
