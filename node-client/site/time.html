@@ -1,18 +1,28 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <link href="{{baseurl}}/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{{baseurl}}/css/map.css" rel="stylesheet">
+<head>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script src="{{baseurl}}/bower_components/lodash/lodash.min.js"></script>
-    <script src="{{baseurl}}/bower_components/handlebars/handlebars.min.js"></script>
+  <link href="{{baseurl}}/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{baseurl}}/css/map.css" rel="stylesheet">
+  <link href="{{baseurl}}/css/time.css" rel="stylesheet">
+  <link href="{{baseurl}}/js/external/jQRangeSlider-5.7.1/css/iThing.css" type="text/css" rel="stylesheet" />
 
-    <script type="text/javascript"
-      src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places&key={{ googleApiKey }}">
-    </script>
-    <title></title>
-  </head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src="{{baseurl}}/bower_components/lodash/lodash.min.js"></script>
+  <script src="{{baseurl}}/bower_components/async/lib/async.js"></script>
+  <script src="{{baseurl}}/bower_components/handlebars/handlebars.min.js"></script>
+  <script src="{{baseurl}}/bower_components/moment/min/moment.min.js"></script>
+  <script src="{{baseurl}}/bower_components/moment-timezone/builds/moment-timezone-with-data.min.js"></script>
+
+  <script src="{{baseurl}}/bower_components/jquery-ui/jquery-ui.min.js"></script>
+
+  <script src="{{baseurl}}/js/external/jQRangeSlider-5.7.1/jQDateRangeSlider-min.js"></script>
+
+  <script type="text/javascript"
+    src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places&key={{ googleApiKey }}">
+  </script>
+  <title></title>
+</head>
   <body>
 
     <div id="title">
@@ -23,6 +33,7 @@
 
     <input id="pac-input" class="controls" type="text" placeholder="Search Box">
 
+    <div id="slider"></div>
     <div id="map-canvas"></div>
 
     <script type="text/javascript">
@@ -40,7 +51,10 @@
               , input
               , searchBox
               , circle
+              , now = new Date()
               ;
+
+            moment.tz.setDefault('America/New_York');
 
             $.get('{{ baseurl }}/templates/markerLabel.hbt', function(response) {
                 markerTemplate = response;
@@ -85,6 +99,20 @@
             map = new google.maps.Map(
                 document.getElementById('map-canvas'), mapOptions
             );
+
+            $('#slider').dateRangeSlider({
+                bounds: {
+                    min: moment(now).subtract(2, 'days')
+                  , max: moment(now)
+                }
+              , defaultValues: {
+                    min: moment(now).subtract(3, 'hours')
+                  , max: moment(now)
+                }
+              , formatter: function(val){
+                  return moment(val).format('MMM d HH:mm');
+                }
+            });
 
             defaultBounds = new google.maps.LatLngBounds(
                 new google.maps.LatLng(40.5202, -74.2713),
@@ -200,7 +228,7 @@
             function showContextMenu(currentLatLng) {
                 var projection
                   , contextmenuDir
-                  , searchRadius = ((1 / map.getZoom()) * 10000) + (map.getZoome() * 100)
+                  , searchRadius = (1 / map.getZoom()) * 10000
                   , nearbyRoutes = []
                   , plotLink = '{{ baseurl }}/charts/?id='
                   ;
@@ -274,6 +302,8 @@
             }
 
             $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
+                var pathFetchers = {};
+
                 _.each(data.paths, function(pathData, pathId) {
                     var linkStrings = pathData.linkPoints.trim().split(/\s+/)
                       , coords = []
@@ -297,13 +327,14 @@
                             );
                             coords.push(lastCoord);
                         } else {
-                            console.log('Skipped %s coordinate "%s"', pathId, point)
+                            // console.log('Skipped %s coordinate "%s"', pathId, point)
                         }
 
                     });
 
                     trafficRoute = new google.maps.Polyline({
                         path: coords
+                      , visible: false
                       , geodesic: true
                       , strokeColor: getRandomColor()
                       , strokeOpacity: 1.0
@@ -313,6 +344,7 @@
                     marker = new google.maps.Marker({
                         position: coords[0]
                       , map: map
+                      , visible: false
                       , animation: google.maps.Animation.DROP
                       , title: 'Route ' + pathId
                     });
@@ -344,6 +376,30 @@
 
                 _.each(routes, function(route) {
                     route.line.setMap(map);
+                });
+
+                _.each(_.keys(data.paths), function(pathId) {
+                    pathFetchers[pathId] = function(callback) {
+                        $.get('{{ baseurl }}/data/' + pathId, function(data) {
+                            var lines = data.split('\n')
+                              , line
+                              , out = [];
+                            // ignore header
+                            lines.shift();
+                            while (lines.length) {
+                                line = lines.shift().split(',');
+                                out.push({
+                                    date: moment(line[0], 'YYYY/MM/DD HH:mm:ss')
+                                  , anomaly: parseFloat(line[2])
+                                });
+                            }
+                            callback(null, out);
+                        });
+                    };
+                });
+
+                async.parallel(pathFetchers, function(err, data) {
+                    console.log(data);
                 });
             });
 
