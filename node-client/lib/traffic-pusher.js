@@ -42,25 +42,12 @@ TrafficPusher.prototype.init = function(maxPaths, callback) {
     me.trafficDataClient.getPaths(function(err, pathDetails) {
         if (err) return callback(err);
         me.pathDetails = pathDetails;
-        me.pathIds = _.keys(pathDetails.paths);
-        // We do not want to use some paths with stale data. If the DataAsOf prop
-        // is older than a month, we'll remove it from the path ids so it doesn't
-        // get processed.
-        _.each(pathDetails.paths, function(details, id) {
-            var dateString = details.DataAsOf
-              , date = dateStringToMomentWithZone(dateString, TZ)
-              , monthAgo = date.subtract(1, 'month')
-              ;
-            if (date < monthAgo) {
-                console.log('Suppressing path %s because of old data', id);
-                me.pathIds.splice(me.pathIds.indexOf(id), 1);
-            }
-        });
+        me.pathIds = _.keys(pathDetails.keys);
         // For debugging with fewer than all the paths
         if (maxPaths) {
             me.pathIds = me.pathIds.slice(0, maxPaths);
         }
-        callback(null, me.pathIds, pathDetails.paths);
+        callback(null, me.pathIds, pathDetails.keys);
     });
 };
 
@@ -102,25 +89,31 @@ TrafficPusher.prototype.fetch = function(callback) {
                 }
                 // Get complete path data for one route.
                 me.trafficDataClient.getPath(id, params, function(err, allPaths) {
-                    var htmPosters = [];
-                    _.each(allPaths.path, function(pathData) {
+                    var htmPosters = []
+                      , headers = allPaths.headers
+                      , data = allPaths.data;
+                    _.each(data, function(pathData) {
                         htmPosters.push(function(htmCallback) {
-                            var timestamp = dateStringToMomentWithZone(
-                                pathData.DataAsOf, TZ
-                            ).unix();
+                            var timeString = pathData[headers.indexOf('datetime')]
+                              , speed = pathData[headers.indexOf('Speed')]
+                              , travelTime = pathData[headers.indexOf('TravelTime')]
+                              , timestamp = dateStringToMomentWithZone(
+                                    timeString, TZ
+                                ).unix()
+                              ;
                             me.htmEngineClient.postData(
-                                id, pathData.Speed, timestamp, htmCallback
+                                id, speed, timestamp, htmCallback
                             );
                         });
                     });
                     console.log(
-                        'Path %s: posting %s data points to HTM engine...', 
-                        id, allPaths.count
+                        'Path %s: posting %s data points to HTM engine...',
+                        id, data.length
                     );
                     async.series(htmPosters, function(err) {
                         var left = me.pathIds.length - ++complete;
                         console.log(
-                            'Path %s: posted to HTM engine (%s more to go)...', 
+                            'Path %s: posted to HTM engine (%s more to go)...',
                             id, left
                         );
                         localCallback(err);

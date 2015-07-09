@@ -2,12 +2,13 @@ var qs = require('querystring')
   , request = require('request')
   ;
 
-function TrafficDataClient(uri) {
-    this.uri = uri;
+function TrafficDataClient(riverViewUrl, riverName) {
+    this.riverViewUrl = riverViewUrl;
+    this.riverName = riverName;
 }
 
 TrafficDataClient.prototype.getPaths = function(callback) {
-    var url = this.uri + '/paths/?includeDetails=1';
+    var url = this.riverViewUrl + '/' + this.riverName + '/keys.json?includeDetails=1';
     request.get(url, function(error, response, body) {
         var jsonOut;
         try {
@@ -22,7 +23,7 @@ TrafficDataClient.prototype.getPaths = function(callback) {
 };
 
 TrafficDataClient.prototype.getPath = function(id, params, callback) {
-    var url = this.uri + '/' + id;
+    var url = this.riverViewUrl + '/' + this.riverName + '/' + id + '/data.json';
     if (params) {
         url += '?' + qs.stringify(params);
     }

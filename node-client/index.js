@@ -11,7 +11,8 @@ var path = require('path')
   , config = require('./conf/config')
 
   , htmEngineServerUri = 'http://localhost:8080'
-  , dataServerUri = config.dataServer
+  , riverViewUrl = config.riverViewUrl
+  , riverName = config.riverName
 
   , ajaxRequestHandlers
   , trafficDataClient
@@ -24,7 +25,7 @@ var path = require('path')
 
 interval = moment.duration(parseInt(interval.shift()), interval.shift());
 
-trafficDataClient = new TrafficDataClient(dataServerUri);
+trafficDataClient = new TrafficDataClient(riverViewUrl, riverName);
 htmEngineClient = new HtmEngineClient(htmEngineServerUri);
 
 trafficPusher = new TrafficPusher({
@@ -51,10 +52,12 @@ trafficPusher.init(maxPaths, function(err, pathIds, pathDetails) {
 
     // Prep some template data for the static site.
     _.each(pathIds, function(id) {
+        // Add an id to each.
+        pathDetails[id].id = id;
         allPathData.push(pathDetails[id]);
     });
 
-    buildStaticSite(allPathData, dataServerUri, htmEngineServerUri);
+    buildStaticSite(allPathData, riverViewUrl, htmEngineServerUri);
     app.use(express.static('build'));
     app.use('/data/anomalies', ajaxRequestHandlers.getAllAnomalies);
     app.use('/data/anomalyAverage', ajaxRequestHandlers.getAnomalyAverage);
