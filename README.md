@@ -32,7 +32,7 @@ at https://github.com/oxtopus/skeleton-htmengine-app
 
 Also, if you want to view the map of all the traffic paths (at `http://localhost:8083/map`) you'll need a [Google Maps API key](https://developers.google.com/maps/).
 
-    export GOOGLE_API_KEY=<your key>
+    export GOOGLE_MAPS_API_KEY=<your key>
 
 # Startup
 
