@@ -8,15 +8,15 @@ This server runs NuPIC within the [HTM Engine](https://github.com/numenta/nument
 
 This fetches the data, controls the HTM Engine via HTTP, pipes in mountains of data, displays results in webapp.
 
-## 3. Data Service
+## 3. [River View](http://data.numenta.org) Data Service
 
-This application is using a data service called [nyc-traffic-service](https://github.com/rhyolight/nyc-traffic-service), which is currently running at http://sheltered-oasis-4180.herokuapp.com. It explains itself in its README, too.
+This application is using a data service called [River View](https://github.com/nupic-community/river-view), which is currently running at <http://data.numenta.org>. It provides temporal data within a 6-month window, which includes NYC traffic data.
 
 * * *
 
 # BUILD YOUR OWN
 
-at https://github.com/oxtopus/skeleton-htmengine-app
+This project started with a fork of the [skeleton-htmengine-app](https://github.com/oxtopus/skeleton-htmengine-app). That project is a great place to start if you want to create your own HTM Engine instance. All you really need to change is the MySQL database name and RabbitMQ queue names.
 
 * * *
 
@@ -49,12 +49,12 @@ Start supervisord from the `python-engine` folder.
 
 ## HTM HTTP Server (Python)
 
-Provides a simple GET/POST/PUT HTTP interface on top of the HTM Engine.
+Provides a simple `GET`/`POST`/`PUT` HTTP interface on top of the HTM Engine.
 
     cd python-engine
     python webapp.py
 
-This will run at http://localhost:8080.
+This will run at <http://localhost:8080>.
 
 ## HTM Client (JavaScript)
 
@@ -62,8 +62,10 @@ This will run at http://localhost:8080.
     npm install .
     npm start
 
-This will run at <http://localhost:8083>. You only need to run `npm install` once. 
+This will run at <http://localhost:8083>. You only need to run `npm install` once.
 
 * * *
 
-This is a work in progress.
+# Runtime
+
+Immediately after startup, the Node.js client application will start pulling traffic data from [River View](http://data.numenta.org/nyc-traffic/keys.json?includeDetails=1) and pushing it into the HTM Engine. A model is created for every traffic route available. For example, [traffic path "1"](http://data.numenta.org/nyc-traffic/1/meta.html) contains [traffic data](http://data.numenta.org/nyc-traffic/1/data.html) for __"11th ave n ganservoort - 12th ave @ 40th st"__ in Manhattan. This correlates to an HTM Engine model named "1". You can see the raw data for this model by querying the Python HTM Engine HTTP wrapper at <http://localhost:8080/1>. You should see a bunch of text data in the response.
