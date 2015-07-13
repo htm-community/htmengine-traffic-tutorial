@@ -5,21 +5,7 @@ layout: main.hbt
 
 <script src="{{baseurl}}/bower_components/dygraphs/extras/synchronizer.js"></script>
 
-
-<style>
-    table {
-        width: 100%;
-    }
-    table td {
-        padding: 0;
-    }
-    table td.left {
-        width: 20%;
-    }
-    table td.right {
-        width: 80%;
-    }
-</style>
+<link href="{{baseurl}}/css/charts.css" rel="stylesheet">
 
 <div id="title">
     <h2>All Traffic Routes</h2>
@@ -53,10 +39,12 @@ layout: main.hbt
 
             $('table.charts tbody').append(
                 "<tr><td class='left'>"
+              + "<h4>"
               + "<a href='{{ baseurl }}/map?id=" + id + "' target='_blank'>"
               + id
               + "</a> "
               + "(" + details.Borough + ")"
+              + "</h4>"
               + "<br/>" + details.linkName
               + "</td><td class='right' id='container-" + id + "'>"
               + "<div id='chart-" + id + "'></div>"
