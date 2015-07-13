@@ -37,6 +37,7 @@ HtmEngineClient.prototype.getData = function(id, callback) {
               , value = Number(pieces[1])
               , timestamp = parseInt(pieces[2])
               , anomalyScore = pieces[3]
+              , displayValue = pieces[4]
               ;
             if (anomalyScore == 'None') {
                 anomalyScore = undefined;
@@ -47,6 +48,7 @@ HtmEngineClient.prototype.getData = function(id, callback) {
                 value: value
               , timestamp: timestamp
               , anomaly: anomalyScore
+              , displayValue: displayValue
             };
         });
         callback(null, rows);

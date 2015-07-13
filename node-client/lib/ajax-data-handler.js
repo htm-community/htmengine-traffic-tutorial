@@ -25,7 +25,6 @@ function respondInCsv(data, headers, res) {
     var csv = '';
     res.setHeader('Content-Type', 'text');
     csv += headers.join(',') + '\n';
-
     _.each(data, function(pathData, index) {
         var rowOut = _.map(headers, function(key) {
             if (key == 'timestamp') {
@@ -50,7 +49,7 @@ function getPathData(req, res) {
             res.end(err.message);
             return;
         }
-        respondInCsv(data, ['timestamp', 'value', 'anomaly'], res);
+        respondInCsv(data, ['timestamp', 'value', 'anomaly', 'displayValue'], res);
     });
 }
 
@@ -61,17 +60,10 @@ function getOnePathData(id, query, callback) {
         // Apply time filters
         if (_.keys(query).length) {
             filtered = _.filter(pathData, function(point) {
-                // console.log(
-                //     '%s\t%s\t%s'
-                //   , moment.tz(query.since*1000, TZ).format()
-                //   , moment.tz(point.timestamp*1000, TZ).format()
-                //   , moment.tz(query.until*1000, TZ).format()
-                // );
                 var match = (
                     (! query.since || point.timestamp > query.since)
                  && (! query.until || point.timestamp < query.until)
                 );
-                // console.log(match);
                 return match;
             });
         } else {
