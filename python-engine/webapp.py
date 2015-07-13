@@ -100,7 +100,8 @@ def handler(environ, start_response):
       fields = (schema.metric_data.c.metric_value,
                 schema.metric_data.c.timestamp,
                 schema.metric_data.c.rowid,
-                schema.metric_data.c.anomaly_score)
+                schema.metric_data.c.anomaly_score,
+                schema.metric_data.c.display_value)
       sort = schema.metric_data.c.timestamp.asc()
 
       metricObj = repository.getCustomMetricByName(conn, metricName, fields=[
@@ -118,7 +119,8 @@ def handler(environ, start_response):
           metricName,
           str(row.metric_value),
           str(calendar.timegm(row.timestamp.timetuple())),
-          str(row.anomaly_score))) + "\n"
+          str(row.anomaly_score),
+          str(row.display_value))) + "\n"
 
 
 server = pywsgi.WSGIServer(('', 8080), handler)
