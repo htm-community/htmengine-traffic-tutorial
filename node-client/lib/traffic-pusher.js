@@ -77,6 +77,9 @@ TrafficPusher.prototype.fetch = function(callback) {
     async.parallel(lastUpdatedFetchers, function(err, lastUpdated) {
         var primers = {}
           , complete = 0;
+
+        if (err) return callback(err);
+
         _.each(me.pathIds, function(id) {
             primers[id] = function(localCallback) {
                 var params = {};
@@ -90,8 +93,13 @@ TrafficPusher.prototype.fetch = function(callback) {
                 // Get complete path data for one route.
                 me.trafficDataClient.getPath(id, params, function(err, allPaths) {
                     var htmPosters = []
-                      , headers = allPaths.headers
-                      , data = allPaths.data;
+                      , headers
+                      , data
+                      ;
+                    if (err) return callback(err);
+                    headers = allPaths.headers
+                    data = allPaths.data;
+
                     _.each(data, function(pathData) {
                         htmPosters.push(function(htmCallback) {
                             var timeString = pathData[headers.indexOf('datetime')]
@@ -111,7 +119,9 @@ TrafficPusher.prototype.fetch = function(callback) {
                         id, data.length
                     );
                     async.series(htmPosters, function(err) {
-                        var left = me.pathIds.length - ++complete;
+                        var left;
+                        if (err) return callback(err);
+                        left = me.pathIds.length - ++complete;
                         console.log(
                             'Path %s: posted to HTM engine (%s more to go)...',
                             id, left
@@ -143,7 +153,9 @@ TrafficPusher.prototype.start = function(interval) {
                 moment.duration(interval, 'ms').humanize()
             );
             setInterval(function() {
-                me.fetch();
+                me.fetch(function(err) {
+                    if (err) console.error(err);
+                });
             }, interval);
         });
     });};
