@@ -69,9 +69,35 @@ $(function() {
         return validNumbers && validPoint;
     }
 
+    function getMaxAnomalyScoreInRouteDataBetween(data, min, max) {
+        var maxAnomaly = 0.0;
+        _.each(data, function(point) {
+            var t = point.timestamp;
+            // console.log('%s < %s < %s (%s)', min, t, max, point.timestamp);
+            if (min < t && t < max) {
+                if (point.anomaly > maxAnomaly) {
+                    maxAnomaly = point.anomaly;
+                }
+            }
+        });
+        return maxAnomaly;
+    }
+
+    function applyTimeWindowAnomalyColoring(routes, min, max) {
+        _.each(routes, function(route) {
+            var data = route.data
+              , maxAnomaly = getMaxAnomalyScoreInRouteDataBetween(
+                  data, min, max
+                )
+              , color = getGreenToRed(maxAnomaly * 100);
+            route.line.setOptions({strokeColor: '#' + color});
+        });
+    }
+
     // MAP //
-    function TrafficMap(elementId, baseurl, options) {
+    function TrafficMap(elementId, baseurl, markerTemplate, options) {
         this.baseurl = baseurl;
+        this.markerTemplate = markerTemplate;
         this.map = new google.maps.Map(
             document.getElementById(elementId), options
         );
@@ -169,8 +195,10 @@ $(function() {
 
     };
 
-    TrafficMap.prototype.setRoutePaths = function(paths, markerTemplate, clr) {
-        var me = this;
+    TrafficMap.prototype.setRoutePaths = function(paths) {
+        var me = this
+          , markerTemplate = me.markerTemplate
+          ;
 
         me.routes = [];
         me.routeMarkers = [];
@@ -182,7 +210,7 @@ $(function() {
               , trafficRoute
               , marker
               , contentString
-              , color = clr || getRandomColor()
+              , color = getRandomColor()
               , infoWindow
               ;
 
@@ -216,15 +244,16 @@ $(function() {
             marker = new google.maps.Marker({
                 position: coords[0]
               , map: me.map
-              , animation: google.maps.Animation.DROP
               , title: 'Route ' + pathId
+              , icon: me.baseurl + '/images/road.png'
             });
 
             contentString = Handlebars.compile(markerTemplate)({
-                id: pathId
-              , borough: pathData.Borough
-              , address: pathData.linkName
-              , baseurl: me.baseurl
+                title: 'Route ' + pathId
+              , subtitle: pathData.Borough
+              , description: pathData.linkName
+              , link: me.baseurl + '/charts/?id=' + pathId
+              , linkName: 'chart'
             });
 
             infoWindow = new google.maps.InfoWindow({
@@ -247,9 +276,51 @@ $(function() {
         });
     };
 
+    TrafficMap.prototype.setIncidents = function(incidents) {
+        var me = this
+          , markerTemplate = me.markerTemplate
+          ;
+        me.incidentMarkers = [];
+        _.each(incidents, function(incident) {
+            var coords
+              , trafficMarker
+              , contentString
+              , info;
+
+            coords = new google.maps.LatLng(
+                incident.latitude
+              , incident.longitude
+            );
+
+            trafficMarker = new google.maps.Marker({
+                  position: coords
+                , map: me.map
+                , title: incident.event_type
+                , icon: me.baseurl + '/images/caraccident.png'
+            });
+
+            contentString = Handlebars.compile(markerTemplate)({
+                title: incident.event_type + ' ' + incident.begins
+              , subtitle: incident.event_status
+              , description: incident.description || incident.begins
+            });
+
+            info = new google.maps.InfoWindow({
+                content: contentString
+            });
+
+            google.maps.event.addListener(trafficMarker, 'click', function() {
+                info.open(me.map, trafficMarker);
+            });
+
+            me.incidentMarkers.push(trafficMarker);
+        });
+    };
+
     TrafficMap.prototype.setMinMaxTime = function(min, max) {
         this.minTime = min;
         this.maxTime = max;
+        applyTimeWindowAnomalyColoring(this.routes, min, max);
     };
 
 

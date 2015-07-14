@@ -1,4 +1,6 @@
-<h3>Traffic Route {{ id }}</h3>
-<h4>{{ borough }}</h4>
-<p>{{ address }}</p>
-<a href="{{ baseurl }}/charts/?id={{ id }}">chart</a>
+<h3>{{ title }}</h3>
+<h4>{{ subtitle }}</h4>
+<p>{{ description }}</p>
+{{#if link}}
+    <a href="{{ link }}">{{ linkName }}</a>
+{{/if}}
