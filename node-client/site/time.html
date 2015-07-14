@@ -18,6 +18,9 @@
 
   <script src="{{baseurl}}/js/external/jQRangeSlider-5.7.1/jQDateRangeSlider-min.js"></script>
 
+  <script src="{{baseurl}}/js/utils.js"></script>
+  <script src="{{baseurl}}/js/map.js"></script>
+
   <script type="text/javascript"
     src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places&key={{ googleApiKey }}">
   </script>
@@ -31,380 +34,97 @@
         <p>Each route has a marker at its first point. Click it to get more details.</p>
     </div>
 
-    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <!-- <input id="pac-input" class="controls" type="text" placeholder="Search Box"> -->
 
     <div id="slider"></div>
     <div id="map-canvas"></div>
 
     <script type="text/javascript">
-        function initialize() {
 
-            var markerTemplate
-              , pageTitle
-              , mapOptions
-              , routes
-              , routeMarkers = []
-              , markers
-              , query
-              , map
-              , defaultBounds
-              , input
-              , searchBox
-              , circle
-              , now = new Date()
-              ;
+    $(function() {
 
-            moment.tz.setDefault('America/New_York');
+        var markerTemplate
+          , pageTitle
+          , mapOptions
+          , query
+          , map
+          , now = moment()
+          , $slider = $('#slider')
+          ;
 
-            $.get('{{ baseurl }}/templates/markerLabel.hbt', function(response) {
-                markerTemplate = response;
-            });
+        $.get('{{ baseurl }}/templates/markerLabel.hbt', function(response) {
+            markerTemplate = response;
+        });
 
-            // Read a page's GET URL variables and return them as an associative array.
-            function getUrlVars() {
-                var vars = [], hash;
-                var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-                for(var i = 0; i < hashes.length; i++)
-                {
-                    hash = hashes[i].split('=');
-                    vars.push(hash[0]);
-                    vars[hash[0]] = hash[1];
-                }
-                return vars;
-            }
+        query = getUrlVars();
 
-            mapOptions = {
-                center: { lat: 40.7903, lng: -73.9597},
-                zoom: 11
-            };
-
-            routes = [];
-            markers = [];
-            query = {
-                borough: getUrlVars()['borough']
-              , id: getUrlVars()['id']
-            };
-
-            if (query.borough) {
-                query.borough = query.borough.replace('%20',' ')
-                pageTitle = 'Map of ' + query.borough;
-            } else if (query.id) {
-                pageTitle = 'Map of route(s): ' + query.id;
-            }
-
-            $('#title h1').html(pageTitle);
-            $('title').html(pageTitle);
-
-
-            map = new google.maps.Map(
-                document.getElementById('map-canvas'), mapOptions
-            );
-
-            $('#slider').dateRangeSlider({
-                bounds: {
-                    min: moment(now).subtract(2, 'days')
-                  , max: moment(now)
-                }
-              , defaultValues: {
-                    min: moment(now).subtract(3, 'hours')
-                  , max: moment(now)
-                }
-              , formatter: function(val){
-                  return moment(val).format('MMM d HH:mm');
-                }
-            });
-
-            defaultBounds = new google.maps.LatLngBounds(
-                new google.maps.LatLng(40.5202, -74.2713),
-                new google.maps.LatLng(40.8944, -73.5950));
-            map.fitBounds(defaultBounds);
-
-            input = (document.getElementById('pac-input'));
-            map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
-            searchBox = new google.maps.places.SearchBox((input));
-
-            // Listen for the event fired when the user selects an item from the
-            // pick list. Retrieve the matching places for that item.
-            google.maps.event.addListener(searchBox, 'places_changed', function() {
-                var places
-                  , i
-                  , image
-                  , marker
-                  ;
-
-                places = searchBox.getPlaces();
-
-                if (places.length == 0) {
-                    return;
-                }
-                _.each(markers, function(marker) {
-                    marker.setMap(null);
-                });
-
-                // For each place, get the icon, place name, and location.
-                markers = [];
-                bounds = new google.maps.LatLngBounds();
-                _.each(places, function(place) {
-                    image = {
-                        url: place.icon
-                      , size: new google.maps.Size(71, 71)
-                      , origin: new google.maps.Point(0, 0)
-                      , anchor: new google.maps.Point(17, 34)
-                      , scaledSize: new google.maps.Size(25, 25)
-                    };
-
-                    // Create a marker for each place.
-                    marker = new google.maps.Marker({
-                        map: map
-                      , icon: image
-                      , title: place.name
-                      , position: place.geometry.location
-                    });
-
-                    markers.push(marker);
-
-                    bounds.extend(place.geometry.location);
-                });
-
-                map.fitBounds(bounds);
-            });
-
-            // Bias the SearchBox results towards places that are within the bounds of the
-            // current map's viewport.
-            google.maps.event.addListener(map, 'bounds_changed', function() {
-                searchBox.setBounds(map.getBounds());
-                $('.contextmenu').remove();
-                if (circle) {
-                    circle.setMap(null);
-                }
-            });
-
-            function setMenuXY(currentLatLng) {
-                var mapWidth = $('#map_canvas').width()
-                  , mapHeight = $('#map_canvas').height()
-                  , menuWidth = $('.contextmenu').width()
-                  , menuHeight = $('.contextmenu').height()
-                  , clickedPosition = getCanvasXY(currentLatLng)
-                  , x = clickedPosition.x
-                  , y = clickedPosition.y
-                  ;
-
-                //if to close to the map border, decrease x position
-                if((mapWidth - x ) < menuWidth) {
-                    x = x - menuWidth;
-                }
-                //if to close to the map border, decrease y position
-                if((mapHeight - y ) < menuHeight) {
-                    y = y - menuHeight;
-                }
-
-                $('.contextmenu').css('left',x  );
-                $('.contextmenu').css('top',y );
-            }
-
-            function getCanvasXY(currentLatLng) {
-                var scale = Math.pow(2, map.getZoom())
-                  , nw = new google.maps.LatLng(
-                        map.getBounds().getNorthEast().lat()
-                      , map.getBounds().getSouthWest().lng()
-                    )
-                  , worldCoordinateNW = map.getProjection()
-                                           .fromLatLngToPoint(nw)
-                  , worldCoordinate = map.getProjection()
-                                           .fromLatLngToPoint(currentLatLng)
-                  , currentLatLngOffset = new google.maps.Point(
-                        Math.floor((worldCoordinate.x - worldCoordinateNW.x) * scale),
-                        Math.floor((worldCoordinate.y - worldCoordinateNW.y) * scale)
-                    );
-
-                return currentLatLngOffset;
-            }
-
-            function pointInCircle(point, radius, center) {
-                return (google.maps.geometry.spherical.computeDistanceBetween(point, center) <= radius);
-            }
-
-            function showContextMenu(currentLatLng) {
-                var projection
-                  , contextmenuDir
-                  , searchRadius = (1 / map.getZoom()) * 10000
-                  , nearbyRoutes = []
-                  , plotLink = '{{ baseurl }}/charts/?id='
-                  ;
-                projection = map.getProjection();
-
-                $('.contextmenu').remove();
-
-                if (circle) {
-                    circle.setMap(null);
-                }
-                circle = new google.maps.Circle({
-                    strokeColor: '#FF0000'
-                  , strokeOpacity: 0.8
-                  , strokeWeight: 2
-                  , fillColor: '#FF0000'
-                  , fillOpacity: 0.35
-                  , map: map
-                  , center: currentLatLng
-                  , radius:searchRadius
-                });
-
-                _.each(routeMarkers, function(rte) {
-                    if (pointInCircle(rte.getPosition(), circle.getRadius(), circle.getCenter())) {
-                        nearbyRoutes.push(rte);
-                    }
-                });
-
-                plotLink += _.map(nearbyRoutes, function(marker) {
-                    var title = marker.getTitle()
-                      , id = title.split(/\s+/).pop();
-                    return id;
-                }).join(',');
-
-                contextmenuDir = document.createElement("div");
-                contextmenuDir.className  = 'contextmenu';
-                contextmenuDir.innerHTML =
-                    '<a href="' + plotLink + '" target="_blank">'
-                  + '<div class="context">Chart routes within cirle<\/div>'
-                  + '<\/a>';
-                $(map.getDiv()).append(contextmenuDir);
-                setMenuXY(currentLatLng);
-                contextmenuDir.style.visibility = "visible";
-
-            }
-
-            google.maps.event.addListener(map, "rightclick", function(event){
-                showContextMenu(event.latLng);
-            });
-
-            function isNumeric(n) {
-                return !isNaN(parseFloat(n)) && isFinite(n);
-            }
-
-            function getRandomColor() {
-                var letters = '0123456789ABCDEF'.split('');
-                var color = '#';
-                for (var i = 0; i < 6; i++ ) {
-                    color += letters[Math.floor(Math.random() * 16)];
-                }
-                return color;
-            }
-
-            function isGoodCoordinate(lat, lon, closePoint) {
-                var validNumbers = isNumeric(lat) && isNumeric(lon)
-                  , validPoint = true;
-                if (validNumbers && closePoint) {
-                    validPoint = Math.abs(closePoint.lat() - Number(lat)) < 0.01
-                              && Math.abs(closePoint.lng() - Number(lon)) < 0.01
-                }
-                return validNumbers && validPoint;
-            }
-
-            $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
-                var pathFetchers = {};
-
-                _.each(data.paths, function(pathData, pathId) {
-                    var linkStrings = pathData.linkPoints.trim().split(/\s+/)
-                      , coords = []
-                      , lastCoord
-                      , trafficRoute
-                      , marker
-                      , contentString
-                      , infoWindow
-                      ;
-                    _.each(linkStrings, function(point) {
-                        var points = point.split(',')
-                          , lat = points.shift()
-                          , lon = points.shift()
-                          ;
-
-                        // The coordinate data from NYCDOT is incomplete.
-                        if (isGoodCoordinate(lat, lon, lastCoord)) {
-                            lastCoord = new google.maps.LatLng(
-                                Number(lat)
-                              , Number(lon)
-                            );
-                            coords.push(lastCoord);
-                        } else {
-                            // console.log('Skipped %s coordinate "%s"', pathId, point)
-                        }
-
-                    });
-
-                    trafficRoute = new google.maps.Polyline({
-                        path: coords
-                      , visible: false
-                      , geodesic: true
-                      , strokeColor: getRandomColor()
-                      , strokeOpacity: 1.0
-                      , strokeWeight: 5
-                    });
-
-                    marker = new google.maps.Marker({
-                        position: coords[0]
-                      , map: map
-                      , visible: false
-                      , animation: google.maps.Animation.DROP
-                      , title: 'Route ' + pathId
-                    });
-
-                    contentString = Handlebars.compile(markerTemplate)({
-                        id: pathId
-                      , borough: pathData.Borough
-                      , address: pathData.linkName
-                      , baseurl: "{{ baseurl }}"
-                    });
-
-                    infowindow = new google.maps.InfoWindow({
-                        content: contentString
-                    });
-
-                    google.maps.event.addListener(marker, 'click', function() {
-                        infowindow.open(map, marker);
-                    });
-
-                    routes.push({
-                        id: pathId
-                      , line: trafficRoute
-                      , details: pathData
-                    });
-
-                    routeMarkers.push(marker);
-
-                });
-
-                _.each(routes, function(route) {
-                    route.line.setMap(map);
-                });
-
-                _.each(_.keys(data.paths), function(pathId) {
-                    pathFetchers[pathId] = function(callback) {
-                        $.get('{{ baseurl }}/data/' + pathId, function(data) {
-                            var lines = data.split('\n')
-                              , line
-                              , out = [];
-                            // ignore header
-                            lines.shift();
-                            while (lines.length) {
-                                line = lines.shift().split(',');
-                                out.push({
-                                    date: moment(line[0], 'YYYY/MM/DD HH:mm:ss')
-                                  , anomaly: parseFloat(line[2])
-                                });
-                            }
-                            callback(null, out);
-                        });
-                    };
-                });
-
-                async.parallel(pathFetchers, function(err, data) {
-                    console.log(data);
-                });
-            });
-
+        if (query.borough) {
+            query.borough = query.borough.replace('%20',' ')
+            pageTitle = 'Map of ' + query.borough;
+        } else if (query.id) {
+            pageTitle = 'Map of route(s): ' + query.id;
         }
-        google.maps.event.addDomListener(window, 'load', initialize);
+
+        $('#title h1').html(pageTitle);
+        $('title').html(pageTitle);
+
+        map = new TrafficMap('map-canvas', '{{baseurl}}', {
+            center: { lat: 40.7903, lng: -73.9597}
+          , zoom: 11
+        });
+
+        // SLIDER
+        sliderOpts = {
+            bounds: {
+                min: moment(now).subtract(2, 'days').toDate()
+              , max: now.toDate()
+            }
+          , defaultValues: {
+                min: moment(now).subtract(3, 'hours').toDate()
+              , max: now.toDate()
+            }
+          , formatter: function(val){
+              return moment(val).format('MMM D HH:mm');
+            }
+        };
+
+        $slider.dateRangeSlider(sliderOpts);
+
+        $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
+            var minMax = $slider.dateRangeSlider('values');
+
+            // map.enableSearchBox('pac-input');
+            // map.enableRightClickSearch();
+
+            map.setRoutePaths(data.paths, markerTemplate);
+            _.each(map.routes, function(rte) {
+                var color;
+                $.get('{{ baseurl }}/data/' + rte.id, function(csv) {
+                    rte.data = csvStringToData(csv);
+                    console.log(rte.data);
+                });
+                color = getGreenToRed(0);
+                rte.line.setOptions({strokeColor: '#' + color});
+            });
+
+        });
+
+        function csvStringToData(csv) {
+            var rows = csv.split('\n')
+              , headers = rows.shift().split(',')
+              , out;
+            rows = _.map(rows, function(row) { return row.split(','); });
+            out = _.map(rows, function(row) {
+                var obj = {};
+                _.each(headers, function(header, i) {
+                    obj[header] = row[i];
+                });
+                return obj;
+            });
+            return out;
+        }
+
+    });
 
     </script>
 
