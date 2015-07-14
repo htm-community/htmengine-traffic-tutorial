@@ -1,0 +1,8 @@
+#slider {
+    padding-top: 50px;
+    z-index: 99;
+}
+
+.modal-content {
+    padding: 100px;
+}
