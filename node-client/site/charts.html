@@ -58,16 +58,18 @@ layout: main.hbt
               , csvPath
               , {
                     anomaly: {
-                        axis: {}
-                      , color: "red"
+                        color: "red"
+                      , axis: {
+                            valueRange: [0, 1.0]
+                        }
                     }
                   , axes: {
                       y: {
                           valueRange: [0, 80]
                       }
-                    , y2: {
-                          valueRanges: [0, 1.1]
-                      }
+                    // , y2: {
+                    //       valueRange: [0, 1.0]
+                    //   }
                   }
                   , width: $('#container-' + id).width()
                   , height: 120
