@@ -1,13 +1,21 @@
+#map-canvas img {
+    opacity: 50%;
+}
+
 html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
 #title {
     position: absolute;
     bottom: 20px;
-    left: 100px;
+    left: 20px;
     background-color: white;
     border-radius: 3px;
     border: solid black 3px;
     padding: 0 20px;
     z-index: 9999;
+    width: 300px;
+}
+#title h1 {
+    font-size: 26pt;
 }
 html, body, #map-canvas {
     height: 100%;

@@ -158,7 +158,7 @@ $(function() {
     TrafficMap.prototype.enableRightClickSearch = function() {
         var me = this;
         google.maps.event.addListener(me.map, "rightclick", function(event) {
-            me.circle = me._showContextMenu(event.latLng);
+            me._showContextMenu(event.latLng);
         });
         google.maps.event.addListener(me.map, 'bounds_changed', function() {
             $('.contextmenu').remove();
@@ -210,7 +210,7 @@ $(function() {
               , geodesic: true
               , strokeColor: color
               , strokeOpacity: 1.0
-              , strokeWeight: 5
+              , strokeWeight: 3
             });
 
             marker = new google.maps.Marker({
@@ -247,23 +247,29 @@ $(function() {
         });
     };
 
+    TrafficMap.prototype.setMinMaxTime = function(min, max) {
+        this.minTime = min;
+        this.maxTime = max;
+    };
+
+
     TrafficMap.prototype._showContextMenu = function(currentLatLng) {
-        var contextmenuDir
+        var me = this
+          , contextmenuDir
           , baseurl = this.baseurl
           , map = this.map
           , searchRadius = (1 / map.getZoom()) * 10000
           , nearbyRoutes = []
           , plotLink = baseurl + '/charts/?id='
-          , circle
           ;
 
         $('.contextmenu').remove();
 
-        if (circle) {
-            circle.setMap(null);
+        if (this.circle) {
+            this.circle.setMap(null);
         }
 
-        circle = new google.maps.Circle({
+        this.circle = new google.maps.Circle({
             strokeColor: '#FF0000'
           , strokeOpacity: 0.8
           , strokeWeight: 2
@@ -275,7 +281,7 @@ $(function() {
         });
 
         _.each(this.routeMarkers, function(rte) {
-            if (pointInCircle(rte.getPosition(), circle.getRadius(), circle.getCenter())) {
+            if (pointInCircle(rte.getPosition(), me.circle.getRadius(), me.circle.getCenter())) {
                 nearbyRoutes.push(rte);
             }
         });
@@ -286,6 +292,13 @@ $(function() {
             return id;
         }).join(',');
 
+        if (this.minTime) {
+            plotLink += '&since=' + this.minTime.unix();
+        }
+        if (this.maxTime) {
+            plotLink += '&until=' + this.maxTime.unix();
+        }
+
         contextmenuDir = document.createElement("div");
         contextmenuDir.className  = 'contextmenu';
         contextmenuDir.innerHTML =
@@ -295,7 +308,6 @@ $(function() {
         $(map.getDiv()).append(contextmenuDir);
         setMenuXY(map, currentLatLng);
         contextmenuDir.style.visibility = "visible";
-        return circle;
     };
 
     window.TrafficMap = TrafficMap;
