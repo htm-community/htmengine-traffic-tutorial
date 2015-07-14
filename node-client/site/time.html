@@ -109,6 +109,7 @@
                                 _.each(headers, function(header, i) {
                                     point[header] = datum[i];
                                 });
+                                point.datetime = dateStringToMomentWithZone(point.datetime, TZ);
                                 out.push(point);
                             }
                         });
@@ -167,33 +168,6 @@
 
         $slider.dateRangeSlider(sliderOpts);
 
-
-
-        // function getMaxAnomalyScoreInRouteDataBetween(data, min, max) {
-        //     var maxAnomaly = 0.0;
-        //     _.each(data, function(point) {
-        //         var t = point.timestamp;
-        //         // console.log('%s < %s < %s (%s)', min, t, max, point.timestamp);
-        //         if (min < t && t < max) {
-        //             if (point.anomaly > maxAnomaly) {
-        //                 maxAnomaly = point.anomaly;
-        //             }
-        //         }
-        //     });
-        //     return maxAnomaly;
-        // }
-        //
-        // function applyTimeWindowAnomalyColoring(routes, min, max) {
-        //     _.each(routes, function(route) {
-        //         var data = route.data
-        //           , maxAnomaly = getMaxAnomalyScoreInRouteDataBetween(
-        //               data, min, max
-        //             )
-        //           , color = getGreenToRed(maxAnomaly * 100);
-        //         route.line.setOptions({strokeColor: '#' + color});
-        //     });
-        // }
-        
         function dateStringToMomentWithZone(timeIn, zone) {
             // 2015/07/01 18:04:03
             var dateString = timeIn.split(' ').shift()

@@ -94,6 +94,16 @@ $(function() {
         });
     }
 
+    function applyTimeWindowTrafficIncidentFiltering(markers, min, max) {
+        _.each(markers, function(marker) {
+            var t = marker.incidentTime
+              , visible;
+            // console.log('%s < %s < %s (%s)', min, t, max, point.timestamp);
+            var visible = (min < t && t < max);
+            marker.setVisible(visible); 
+        });
+    }
+
     // MAP //
     function TrafficMap(elementId, baseurl, markerTemplate, options) {
         this.baseurl = baseurl;
@@ -280,6 +290,7 @@ $(function() {
         var me = this
           , markerTemplate = me.markerTemplate
           ;
+
         me.incidentMarkers = [];
         _.each(incidents, function(incident) {
             var coords
@@ -298,6 +309,7 @@ $(function() {
                 , title: incident.event_type
                 , icon: me.baseurl + '/images/caraccident.png'
             });
+            trafficMarker.incidentTime = incident.datetime;
 
             contentString = Handlebars.compile(markerTemplate)({
                 title: incident.event_type + ' ' + incident.begins
@@ -321,6 +333,7 @@ $(function() {
         this.minTime = min;
         this.maxTime = max;
         applyTimeWindowAnomalyColoring(this.routes, min, max);
+        applyTimeWindowTrafficIncidentFiltering(this.incidentMarkers, min, max);
     };
 
 
