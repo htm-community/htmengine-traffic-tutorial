@@ -27,6 +27,11 @@
         <h1>All Routes</h1>
         <h4><a href="{{ baseurl }}">HOME</a></h4>
         <p>Each route has a marker at its first point. Click it to get more details.</p>
+        <form>
+            <ul>
+                <li><label><input type="checkbox" class="routes" checked="checked"/> Show Route Markers</label></li>
+            </ul>
+        <form>
     </div>
 
     <input id="pac-input" class="controls" type="text" placeholder="Search Box">
@@ -53,9 +58,15 @@
                 });
 
                 $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
+                    var $showRoutes = $('input.routes');
                     map.setRoutePaths(data.paths, markerTemplate);
                     map.enableSearchBox('pac-input');
                     map.enableRightClickSearch();
+
+                    $showRoutes.change(function() {
+                        map.setMarkersVisible('routes', $showRoutes.is(':checked'));
+                    });
+
                 });
 
             });

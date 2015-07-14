@@ -43,7 +43,12 @@
     <div id="title">
         <h1>All Routes</h1>
         <h4><a href="{{ baseurl }}">HOME</a></h4>
-        <p>Each route has a marker at its first point. Click it to get more details.</p>
+        <form>
+            <ul>
+                <li><label><input type="checkbox" class="routes" checked="checked"/> Show Route Markers</label></li>
+                <li><label><input type="checkbox" class="incidents" checked="checked"/> Show Incident Markers</label></li>
+            </ul>
+        <form>
     </div>
 
     <input id="pac-input" class="controls" type="text" placeholder="Search Box">
@@ -63,6 +68,8 @@
           , $loading
           , now = moment()
           , $slider = $('#slider')
+          , $showRoutes = $('input.routes')
+          , $showIncidents = $('input.incidents')
           ;
 
         moment.tz.setDefault(TZ);
@@ -75,6 +82,7 @@
             });
 
             $loading.show();
+
             $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
                 var minMax = $slider.dateRangeSlider('values')
                   , min = moment(minMax.min).tz(TZ)
@@ -124,6 +132,12 @@
                     $loading.hide();
                     $('.modal-backdrop').remove();
                     $('body').removeClass('modal-open');
+                    $showRoutes.change(function() {
+                        map.setMarkersVisible('routes', $showRoutes.is(':checked'));
+                    });
+                    $showIncidents.change(function() {
+                        map.setMarkersVisible('incidents', $showIncidents.is(':checked'));
+                    });
                 });
 
                 $slider.bind('valuesChanging', function(e, data) {

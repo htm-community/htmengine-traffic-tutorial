@@ -89,7 +89,15 @@ $(function() {
               , maxAnomaly = getMaxAnomalyScoreInRouteDataBetween(
                   data, min, max
                 )
-              , color = getGreenToRed(maxAnomaly * 100);
+              , redGreen
+              , color
+              ;
+            if (maxAnomaly > 0.95) {
+                redGreen = (maxAnomaly - 0.95) / 0.05;
+            } else {
+                redGreen = 0.0;
+            }
+            color = getGreenToRed(redGreen * 100);
             route.line.setOptions({strokeColor: '#' + color});
         });
     }
@@ -100,7 +108,7 @@ $(function() {
               , visible;
             // console.log('%s < %s < %s (%s)', min, t, max, point.timestamp);
             var visible = (min < t && t < max);
-            marker.setVisible(visible); 
+            marker.setVisible(visible);
         });
     }
 
@@ -327,6 +335,16 @@ $(function() {
 
             me.incidentMarkers.push(trafficMarker);
         });
+    };
+
+    TrafficMap.prototype.setMarkersVisible = function(type, visible) {
+        var markers;
+        if (type == 'routes') {
+            markers = this.routeMarkers;
+        } else if (type == 'incidents') {
+            markers = this.incidentMarkers;
+        }
+        _.each(markers, function(m) { m.setVisible(visible); });
     };
 
     TrafficMap.prototype.setMinMaxTime = function(min, max) {
