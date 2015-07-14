@@ -9,7 +9,7 @@
     <script src="{{baseurl}}/bower_components/handlebars/handlebars.min.js"></script>
 
     <script type="text/javascript"
-      src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places&key={{ googleApiKey }}">
+      src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places&key={{ googleMapsApiKey }}">
     </script>
     <title></title>
   </head>
@@ -40,6 +40,7 @@
               , input
               , searchBox
               , circle
+              , infoWindows = {}
               ;
 
             $.get('{{ baseurl }}/templates/markerLabel.hbt', function(response) {
@@ -324,12 +325,12 @@
                       , baseurl: "{{ baseurl }}"
                     });
 
-                    infowindow = new google.maps.InfoWindow({
+                    infoWindows[marker.title] = new google.maps.InfoWindow({
                         content: contentString
                     });
 
                     google.maps.event.addListener(marker, 'click', function() {
-                        infowindow.open(map, marker);
+                        infoWindows[marker.title].open(map, marker);
                     });
 
                     routes.push({

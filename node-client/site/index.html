@@ -67,7 +67,7 @@ layout: main.hbt
 {{#each paths}}
     <tr>
     <td>
-            {{this.Id}}
+            {{this.id}}
     </td>
     <td>
             {{this.linkName}}
@@ -76,31 +76,31 @@ layout: main.hbt
             {{this.Borough}}
     </td>
     <td>
-            {{this.DataAsOf}}
+            {{this.datetime}}
     </td>
     <td>
-        <a href="{{ ../baseurl }}/charts/?id={{this.Id}}">
-            /charts/?id={{this.Id}}
+        <a href="{{ ../baseurl }}/charts/?id={{this.id}}">
+            /charts/?id={{this.id}}
         </a>
     </td>
     <td>
-        <a href="{{ ../baseurl }}/map?id={{this.Id}}">
-            /map?id={{this.Id}}
+        <a href="{{ ../baseurl }}/map?id={{this.id}}">
+            /map?id={{this.id}}
         </a>
     </td>
     <td>
-        <a href="{{ ../baseurl }}/data/{{this.Id}}">
-            /data/{{this.Id}}
+        <a href="{{ ../baseurl }}/data/{{this.id}}">
+            /data/{{this.id}}
         </a>
     </td>
     <td>
-        <a href="{{ ../htmEngineServerUrl }}/{{this.Id}}">
-            {{ ../htmEngineServerUrl }}/{{this.Id}} ⤤
+        <a href="{{ ../htmEngineServerUrl }}/{{this.id}}">
+            {{ ../htmEngineServerUrl }}/{{this.id}} ⤤
         </a>
     </td>
     <td>
-        <a href="{{ ../dataSourceUrl }}/{{this.Id}}">
-            {{ ../dataSourceUrl }}/{{this.Id}} ⤤
+        <a href="{{ ../dataSourceUrl }}/{{this.id}}">
+            {{ ../dataSourceUrl }}/{{this.id}} ⤤
         </a>
     </td>
 

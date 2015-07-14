@@ -8,7 +8,7 @@ var path = require('path')
   , config = require('../conf/config')
   , source = '../site'
   , destination = '../build'
-  , googleApiKey = process.env['GOOGLE_API_KEY']
+  , googleMapsApiKey = process.env['GOOGLE_MAPS_API_KEY']
   , layoutDir = path.join(__dirname, source, 'layouts')
   , buildDir = path.join(__dirname, destination)
   ;
@@ -38,7 +38,7 @@ module.exports = function(pathDetails, dataSourceUrl, htmEngineServerUrl) {
           , htmEngineServerUrl: htmEngineServerUrl
           , paths: pathDetails
           , boroughs: extractBoroughs(pathDetails)
-          , googleApiKey: googleApiKey
+          , googleMapsApiKey: googleMapsApiKey
         }))
         .use(layouts({
             engine: 'handlebars'

@@ -227,14 +227,14 @@ function getPathDetails(req, res) {
             if (req.query.borough) {
                 borough = req.query.borough.toLowerCase();
             }
-            _.each(data.paths, function(details, id) {
+            _.each(data.keys, function(details, id) {
                 if (ids.indexOf(id) > -1
                         || details.Borough.toLowerCase() == borough) {
                     paths[id] = details;
                 }
             });
         } else {
-            _.each(data.paths, function(details, id) {
+            _.each(data.keys, function(details, id) {
                 paths[id] = details;
             });
         }
