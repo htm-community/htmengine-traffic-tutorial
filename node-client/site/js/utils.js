@@ -1,19 +1,20 @@
+
 // Read a page's GET URL variables and return them as an associative array.
 function getUrlVars() {
-    var search = location.search.substring(1)
-      , out = {};
+    var search = location.search.substring(1),
+        out = {};
     if (search) {
-        out = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
+        out = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}');
     }
     return out;
 }
 
 /* From http://stackoverflow.com/questions/7128675/from-green-to-red-color-depend-on-percentage */
 
-function getGreenToRed(percent){
+function getGreenToRed(percent) {
     percent = 100 - percent;
-    r = percent<50 ? 255 : Math.floor(255-(percent*2-100)*255/100);
-    g = percent>50 ? 255 : Math.floor((percent*2)*255/100);
+    r = percent < 50 ? 255 : Math.floor(255 - (percent * 2 - 100) * 255 / 100);
+    g = percent > 50 ? 255 : Math.floor((percent * 2) * 255 / 100);
     return rgbToHex(r, g, 0);
 }
 

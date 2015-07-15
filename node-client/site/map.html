@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <link href="{{baseurl}}/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{{baseurl}}/css/map.css" rel="stylesheet">
 
@@ -11,8 +12,7 @@
     <script src="{{baseurl}}/bower_components/moment/min/moment.min.js"></script>
     <script src="{{baseurl}}/bower_components/moment-timezone/builds/moment-timezone-with-data.min.js"></script>
 
-    <script type="text/javascript"
-      src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places&key={{ googleMapsApiKey }}">
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places&key={{ googleMapsApiKey }}">
     </script>
 
     <script src="{{baseurl}}/js/utils.js"></script>
@@ -20,70 +20,73 @@
 
 
     <title></title>
-  </head>
-  <body>
+</head>
 
-    <div id="title">
-        <h1>All Routes</h1>
-        <h4><a href="{{ baseurl }}">HOME</a></h4>
-        <p>Each route has a marker at its first point. Click it to get more details.</p>
+<body>
+
+<div id="title">
+    <h1>All Routes</h1>
+    <h4><a href="{{ baseurl }}">HOME</a></h4>
+    <p>Each route has a marker at its first point. Click it to get more details.</p>
+    <form>
+        <ul>
+            <li>
+                <label>
+                    <input type="checkbox" class="routes" checked="checked" /> Show Route Markers</label>
+            </li>
+        </ul>
         <form>
-            <ul>
-                <li><label><input type="checkbox" class="routes" checked="checked"/> Show Route Markers</label></li>
-            </ul>
-        <form>
-    </div>
+</div>
 
-    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+<input id="pac-input" class="controls" type="text" placeholder="Search Box">
 
-    <div id="map-canvas"></div>
+<div id="map-canvas"></div>
 
-    <script type="text/javascript">
+<script type="text/javascript">
+    $(function() {
 
-        $(function() {
+        var pageTitle, query = getUrlVars(),
+            map;
 
-            var pageTitle
-              , mapOptions
-              , query = getUrlVars()
-              , map
-              ;
+        moment.tz.setDefault('America/New_York');
 
-            moment.tz.setDefault('America/New_York');
+        $.get('{{ baseurl }}/templates/markerLabel.hbt', function(markerTemplate) {
 
-            $.get('{{ baseurl }}/templates/markerLabel.hbt', function(markerTemplate) {
+            map = new TrafficMap('map-canvas', '{{baseurl}}', markerTemplate, {
+                center: {
+                    lat: 40.7903,
+                    lng: -73.9597
+                },
+                zoom: 11
+            });
 
-                map = new TrafficMap('map-canvas', '{{baseurl}}', markerTemplate, {
-                    center: { lat: 40.7903, lng: -73.9597}
-                  , zoom: 11
-                });
+            $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
+                var $showRoutes = $('input.routes');
+                map.setRoutePaths(data.paths, markerTemplate);
+                map.enableSearchBox('pac-input');
+                map.enableRightClickSearch();
 
-                $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
-                    var $showRoutes = $('input.routes');
-                    map.setRoutePaths(data.paths, markerTemplate);
-                    map.enableSearchBox('pac-input');
-                    map.enableRightClickSearch();
-
-                    $showRoutes.change(function() {
-                        map.setMarkersVisible('routes', $showRoutes.is(':checked'));
-                    });
-
+                $showRoutes.change(function() {
+                    map.setMarkersVisible('routes', $showRoutes.is(':checked'));
                 });
 
             });
 
-            if (query.borough) {
-                query.borough = query.borough.replace('%20',' ')
-                pageTitle = 'Map of ' + query.borough;
-            } else if (query.id) {
-                pageTitle = 'Map of route(s): ' + query.id;
-            }
-
-            $('#title h1').html(pageTitle);
-            $('title').html(pageTitle);
-
         });
 
-    </script>
+        if (query.borough) {
+            query.borough = query.borough.replace('%20', ' ')
+            pageTitle = 'Map of ' + query.borough;
+        } else if (query.id) {
+            pageTitle = 'Map of route(s): ' + query.id;
+        }
 
-  </body>
+        $('#title h1').html(pageTitle);
+        $('title').html(pageTitle);
+
+    });
+</script>
+
+</body>
+
 </html>

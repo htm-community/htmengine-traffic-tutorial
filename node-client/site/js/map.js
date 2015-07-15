@@ -1,16 +1,18 @@
+
 $(function() {
 
+    /* < BAG OF FUNCTIONS > */
+
     function getCanvasXY(map, currentLatLng) {
-        var scale = Math.pow(2, map.getZoom())
-          , nw = new google.maps.LatLng(
-                map.getBounds().getNorthEast().lat()
-              , map.getBounds().getSouthWest().lng()
-            )
-          , worldCoordinateNW = map.getProjection()
-                                   .fromLatLngToPoint(nw)
-          , worldCoordinate = map.getProjection()
-                                   .fromLatLngToPoint(currentLatLng)
-          , currentLatLngOffset = new google.maps.Point(
+        var scale = Math.pow(2, map.getZoom()),
+            nw = new google.maps.LatLng(
+                map.getBounds().getNorthEast().lat(), map.getBounds().getSouthWest().lng()
+            ),
+            worldCoordinateNW = map.getProjection()
+                .fromLatLngToPoint(nw),
+            worldCoordinate = map.getProjection()
+                .fromLatLngToPoint(currentLatLng),
+            currentLatLngOffset = new google.maps.Point(
                 Math.floor((worldCoordinate.x - worldCoordinateNW.x) * scale),
                 Math.floor((worldCoordinate.y - worldCoordinateNW.y) * scale)
             );
@@ -18,28 +20,27 @@ $(function() {
     }
 
     function setMenuXY(map, currentLatLng) {
-        var $canvas = $('#map_canvas')
-          , $contextMenu = $('.contextmenu')
-          , mapWidth = $canvas.width()
-          , mapHeight = $canvas.height()
-          , menuWidth = $contextMenu.width()
-          , menuHeight = $contextMenu.height()
-          , clickedPosition = getCanvasXY(map, currentLatLng)
-          , x = clickedPosition.x
-          , y = clickedPosition.y
-          ;
+        var $canvas = $('#map_canvas'),
+            $contextMenu = $('.contextmenu'),
+            mapWidth = $canvas.width(),
+            mapHeight = $canvas.height(),
+            menuWidth = $contextMenu.width(),
+            menuHeight = $contextMenu.height(),
+            clickedPosition = getCanvasXY(map, currentLatLng),
+            x = clickedPosition.x,
+            y = clickedPosition.y;
 
         //if to close to the map border, decrease x position
-        if((mapWidth - x ) < menuWidth) {
+        if ((mapWidth - x) < menuWidth) {
             x = x - menuWidth;
         }
         //if to close to the map border, decrease y position
-        if((mapHeight - y ) < menuHeight) {
+        if ((mapHeight - y) < menuHeight) {
             y = y - menuHeight;
         }
 
-        $contextMenu.css('left',x  );
-        $contextMenu.css('top',y );
+        $contextMenu.css('left', x);
+        $contextMenu.css('top', y);
     }
 
     function pointInCircle(point, radius, center) {
@@ -53,18 +54,18 @@ $(function() {
     function getRandomColor() {
         var letters = '0123456789ABCDEF'.split('');
         var color = '#';
-        for (var i = 0; i < 6; i++ ) {
+        for (var i = 0; i < 6; i++) {
             color += letters[Math.floor(Math.random() * 16)];
         }
         return color;
     }
 
     function isGoodCoordinate(lat, lon, closePoint) {
-        var validNumbers = isNumeric(lat) && isNumeric(lon)
-          , validPoint = true;
+        var validNumbers = isNumeric(lat) && isNumeric(lon),
+            validPoint = true;
         if (validNumbers && closePoint) {
-            validPoint = Math.abs(closePoint.lat() - Number(lat)) < 0.01
-                      && Math.abs(closePoint.lng() - Number(lon)) < 0.01
+            validPoint = Math.abs(closePoint.lat() - Number(lat)) < 0.01 && Math.abs(closePoint.lng() - Number(
+                        lon)) < 0.01
         }
         return validNumbers && validPoint;
     }
@@ -85,34 +86,44 @@ $(function() {
 
     function applyTimeWindowAnomalyColoring(routes, min, max) {
         _.each(routes, function(route) {
-            var data = route.data
-              , maxAnomaly = getMaxAnomalyScoreInRouteDataBetween(
-                  data, min, max
-                )
-              , redGreen
-              , color
-              ;
+            var data = route.data,
+                maxAnomaly = getMaxAnomalyScoreInRouteDataBetween(
+                    data, min, max
+                ),
+                redGreen, color;
             if (maxAnomaly > 0.95) {
                 redGreen = (maxAnomaly - 0.95) / 0.05;
             } else {
                 redGreen = 0.0;
             }
             color = getGreenToRed(redGreen * 100);
-            route.line.setOptions({strokeColor: '#' + color});
+            route.line.setOptions({
+                strokeColor: '#' + color
+            });
         });
     }
 
     function applyTimeWindowTrafficIncidentFiltering(markers, min, max) {
         _.each(markers, function(marker) {
-            var t = marker.incidentTime
-              , visible;
+            var t = marker.incidentTime,
+                visible;
             // console.log('%s < %s < %s (%s)', min, t, max, point.timestamp);
             var visible = (min < t && t < max);
             marker.setVisible(visible);
         });
     }
 
-    // MAP //
+    /* </ BAG OF FUNCTIONS > */
+
+
+    /**
+     * This encapsulates a Google Map and does traffi-related stuff.
+     * @param elementId to render map
+     * @param baseurl where's the data?
+     * @param markerTemplate for marker InfoWindow (html)
+     * @param options Google Map options
+     * @constructor
+     */
     function TrafficMap(elementId, baseurl, markerTemplate, options) {
         this.baseurl = baseurl;
         this.markerTemplate = markerTemplate;
@@ -129,11 +140,9 @@ $(function() {
     }
 
     TrafficMap.prototype.enableSearchBox = function(inputId) {
-        var me = this
-          , map = this.map
-          , input
-          , searchBox
-          ;
+        var me = this,
+            map = this.map,
+            input, searchBox;
 
         me.searchMarkers = []
 
@@ -145,11 +154,7 @@ $(function() {
         // Listen for the event fired when the user selects an item from the
         // pick list. Retrieve the matching places for that item.
         google.maps.event.addListener(searchBox, 'places_changed', function() {
-            var places
-              , image
-              , marker
-              , bounds
-              ;
+            var places, image, marker, bounds;
 
             places = searchBox.getPlaces();
 
@@ -166,19 +171,19 @@ $(function() {
             bounds = new google.maps.LatLngBounds();
             _.each(places, function(place) {
                 image = {
-                    url: place.icon
-                  , size: new google.maps.Size(71, 71)
-                  , origin: new google.maps.Point(0, 0)
-                  , anchor: new google.maps.Point(17, 34)
-                  , scaledSize: new google.maps.Size(25, 25)
+                    url: place.icon,
+                    size: new google.maps.Size(71, 71),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(17, 34),
+                    scaledSize: new google.maps.Size(25, 25)
                 };
 
                 // Create a marker for each place.
                 marker = new google.maps.Marker({
-                    map: map
-                  , icon: image
-                  , title: place.name
-                  , position: place.geometry.location
+                    map: map,
+                    icon: image,
+                    title: place.name,
+                    position: place.geometry.location
                 });
 
                 me.searchMarkers.push(marker);
@@ -214,35 +219,27 @@ $(function() {
     };
 
     TrafficMap.prototype.setRoutePaths = function(paths) {
-        var me = this
-          , markerTemplate = me.markerTemplate
-          ;
+        var me = this,
+            markerTemplate = me.markerTemplate;
 
         me.routes = [];
         me.routeMarkers = [];
 
         _.each(paths, function(pathData, pathId) {
-            var linkStrings = pathData.linkPoints.trim().split(/\s+/)
-              , coords = []
-              , lastCoord
-              , trafficRoute
-              , marker
-              , contentString
-              , color = getRandomColor()
-              , infoWindow
-              ;
+            var linkStrings = pathData.linkPoints.trim().split(/\s+/),
+                coords = [],
+                lastCoord, trafficRoute, marker, contentString, color = getRandomColor(),
+                infoWindow;
 
             _.each(linkStrings, function(point) {
-                var points = point.split(',')
-                  , lat = points.shift()
-                  , lon = points.shift()
-                  ;
+                var points = point.split(','),
+                    lat = points.shift(),
+                    lon = points.shift();
 
                 // The coordinate data from NYCDOT is incomplete.
                 if (isGoodCoordinate(lat, lon, lastCoord)) {
                     lastCoord = new google.maps.LatLng(
-                        Number(lat)
-                      , Number(lon)
+                        Number(lat), Number(lon)
                     );
                     coords.push(lastCoord);
                 } else {
@@ -252,26 +249,26 @@ $(function() {
             });
 
             trafficRoute = new google.maps.Polyline({
-                path: coords
-              , geodesic: true
-              , strokeColor: color
-              , strokeOpacity: 1.0
-              , strokeWeight: 3
+                path: coords,
+                geodesic: true,
+                strokeColor: color,
+                strokeOpacity: 1.0,
+                strokeWeight: 3
             });
 
             marker = new google.maps.Marker({
-                position: coords[0]
-              , map: me.map
-              , title: 'Route ' + pathId
-              , icon: me.baseurl + '/images/road.png'
+                position: coords[0],
+                map: me.map,
+                title: 'Route ' + pathId,
+                icon: me.baseurl + '/images/road.png'
             });
 
             contentString = Handlebars.compile(markerTemplate)({
-                title: 'Route ' + pathId
-              , subtitle: pathData.Borough
-              , description: pathData.linkName
-              , link: me.baseurl + '/charts/?id=' + pathId
-              , linkName: 'chart'
+                title: 'Route ' + pathId,
+                subtitle: pathData.Borough,
+                description: pathData.linkName,
+                link: me.baseurl + '/charts/?id=' + pathId,
+                linkName: 'chart'
             });
 
             infoWindow = new google.maps.InfoWindow({
@@ -283,9 +280,9 @@ $(function() {
             });
 
             me.routes.push({
-                id: pathId
-              , line: trafficRoute
-              , details: pathData
+                id: pathId,
+                line: trafficRoute,
+                details: pathData
             });
             trafficRoute.setMap(me.map);
 
@@ -295,34 +292,29 @@ $(function() {
     };
 
     TrafficMap.prototype.setIncidents = function(incidents) {
-        var me = this
-          , markerTemplate = me.markerTemplate
-          ;
+        var me = this,
+            markerTemplate = me.markerTemplate;
 
         me.incidentMarkers = [];
         _.each(incidents, function(incident) {
-            var coords
-              , trafficMarker
-              , contentString
-              , info;
+            var coords, trafficMarker, contentString, info;
 
             coords = new google.maps.LatLng(
-                incident.latitude
-              , incident.longitude
+                incident.latitude, incident.longitude
             );
 
             trafficMarker = new google.maps.Marker({
-                  position: coords
-                , map: me.map
-                , title: incident.event_type
-                , icon: me.baseurl + '/images/caraccident.png'
+                position: coords,
+                map: me.map,
+                title: incident.event_type,
+                icon: me.baseurl + '/images/caraccident.png'
             });
             trafficMarker.incidentTime = incident.datetime;
 
             contentString = Handlebars.compile(markerTemplate)({
-                title: incident.event_type + ' ' + incident.begins
-              , subtitle: incident.event_status
-              , description: incident.description || incident.begins
+                title: incident.event_type + ' ' + incident.begins,
+                subtitle: incident.event_status,
+                description: incident.description || incident.begins
             });
 
             info = new google.maps.InfoWindow({
@@ -344,7 +336,9 @@ $(function() {
         } else if (type == 'incidents') {
             markers = this.incidentMarkers;
         }
-        _.each(markers, function(m) { m.setVisible(visible); });
+        _.each(markers, function(m) {
+            m.setVisible(visible);
+        });
     };
 
     TrafficMap.prototype.setMinMaxTime = function(min, max) {
@@ -356,14 +350,12 @@ $(function() {
 
 
     TrafficMap.prototype._showContextMenu = function(currentLatLng) {
-        var me = this
-          , contextmenuDir
-          , baseurl = this.baseurl
-          , map = this.map
-          , searchRadius = (1 / map.getZoom()) * 10000
-          , nearbyRoutes = []
-          , plotLink = baseurl + '/charts/?id='
-          ;
+        var me = this,
+            contextmenuDir, baseurl = this.baseurl,
+            map = this.map,
+            searchRadius = (1 / map.getZoom()) * 10000,
+            nearbyRoutes = [],
+            plotLink = baseurl + '/charts/?id=';
 
         $('.contextmenu').remove();
 
@@ -372,14 +364,14 @@ $(function() {
         }
 
         this.circle = new google.maps.Circle({
-            strokeColor: '#FF0000'
-          , strokeOpacity: 0.8
-          , strokeWeight: 2
-          , fillColor: '#FF0000'
-          , fillOpacity: 0.35
-          , map: map
-          , center: currentLatLng
-          , radius:searchRadius
+            strokeColor: '#FF0000',
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: '#FF0000',
+            fillOpacity: 0.35,
+            map: map,
+            center: currentLatLng,
+            radius: searchRadius
         });
 
         _.each(this.routeMarkers, function(rte) {
@@ -389,8 +381,8 @@ $(function() {
         });
 
         plotLink += _.map(nearbyRoutes, function(marker) {
-            var title = marker.getTitle()
-              , id = title.split(/\s+/).pop();
+            var title = marker.getTitle(),
+                id = title.split(/\s+/).pop();
             return id;
         }).join(',');
 
@@ -402,11 +394,10 @@ $(function() {
         }
 
         contextmenuDir = document.createElement("div");
-        contextmenuDir.className  = 'contextmenu';
+        contextmenuDir.className = 'contextmenu';
         contextmenuDir.innerHTML =
-            '<a href="' + plotLink + '" target="_blank">'
-          + '<div class="context">Chart routes within cirle<\/div>'
-          + '<\/a>';
+            '<a href="' + plotLink + '" target="_blank">' +
+            '<div class="context">Chart routes within cirle<\/div>' + '<\/a>';
         $(map.getDiv()).append(contextmenuDir);
         setMenuXY(map, currentLatLng);
         contextmenuDir.style.visibility = "visible";
