@@ -30,14 +30,14 @@ layout: main.hbt
         <div class="row">
             <div class='col-sm-3'>
                 <div class="dropdown">
-                  <button class="btn btn-default dropdown-toggle" type="button" id="borough" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    ALL
-                  </button>
-                  <ul class="dropdown-menu" aria-labelledby="borough">
-                      {{#each boroughs}}
-                      <li><a href="#">{{this}}</a></li>
-                      {{/each}}
-                  </ul>
+                    <button class="btn btn-default dropdown-toggle" type="button" id="borough" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        ALL
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="borough">
+                        {{#each boroughs}}
+                        <li><a href="#">{{this}}</a></li>
+                        {{/each}}
+                    </ul>
                 </div>
             </div>
 
@@ -61,8 +61,8 @@ layout: main.hbt
 
             <div class='col-sm-3'>
                 <div class="input-group">
-                  <span class="input-group-addon" id="threshold-label">Anomalies higher than:</span>
-                  <input type="text" class="form-control" id="threshold" placeholder="0.9" value="0.9" aria-describedby="threshold-label">
+                    <span class="input-group-addon" id="threshold-label">Anomalies higher than:</span>
+                    <input type="text" class="form-control" id="threshold" placeholder="0.9" value="0.9" aria-describedby="threshold-label">
                 </div>
             </div>
 
@@ -92,7 +92,6 @@ layout: main.hbt
 <div class="report"></div>
 
 <script type="text/javascript">
-
     moment.tz.setDefault("America/New_York");
 
     $(function() {
@@ -100,32 +99,21 @@ layout: main.hbt
         var since = $('#since').datetimepicker({
             defaultDate: moment().subtract(6, 'hours')
         }).data("DateTimePicker");
+
         var until = $('#until').datetimepicker({
             defaultDate: moment()
         }).data("DateTimePicker");
+
         var template;
 
-        $('.dropdown-menu li > a').click(function(e){
+        $('.dropdown-menu li > a').click(function(e) {
             $('#borough').text(this.innerHTML);
         });
 
-        // Read a page's GET URL variables and return them as an associative array.
-        function getUrlVars() {
-            var vars = [], hash;
-            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-            for(var i = 0; i < hashes.length; i++) {
-                hash = hashes[i].split('=');
-                vars.push(hash[0]);
-                vars[hash[0]] = hash[1];
-            }
-            return vars;
-        }
-
         $('#search').click(function() {
-            var borough = $('#borough').html().trim()
-              , url = '{{ baseurl }}/data/anomalyAbove'
-              , query = {}
-              ;
+            var borough = $('#borough').html().trim(),
+                    url = '{{ baseurl }}/data/anomalyAbove',
+                    query = {};
 
             query.since = since.date().unix();
             query.until = until.date().unix();
@@ -141,17 +129,19 @@ layout: main.hbt
                 var plotLink, mapLink, linkParams;
                 delete query.threshold;
                 delete query.borough;
-                query.id = _.map(data, function(d) { return d.id; }).join(',');
+                query.id = _.map(data, function(d) {
+                    return d.id;
+                }).join(',');
                 plotLink = '{{ baseurl }}/charts/?' + $.param(query);
                 mapLink = '{{ baseurl }}/map/?id=' + query.id;
-                delete query.id
+                delete query.id;
                 linkParams = $.param(query);
                 $('.report').html(Handlebars.compile(template)({
-                    routes: data
-                  , plotLink: plotLink
-                  , mapLink: mapLink
-                  , linkParams: linkParams
-                  , baseurl: "{{ baseurl }}"
+                    routes: data,
+                    plotLink: plotLink,
+                    mapLink: mapLink,
+                    linkParams: linkParams,
+                    baseurl: "{{ baseurl }}"
                 }));
             });
         });

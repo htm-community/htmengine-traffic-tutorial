@@ -1,3 +1,7 @@
+
+/*
+ * JSON HTTP rendering utilities.
+ */
 function renderJson(output, res) {
     var out = output;
     if (typeof output == 'object') {
@@ -8,9 +12,8 @@ function renderJson(output, res) {
 }
 
 function renderJsonp(output, cbName, res) {
-    var out = output
-      , textOut
-      ;
+    var out = output,
+        textOut;
     if (typeof output == 'object') {
         out = JSON.stringify(output);
     }
@@ -20,7 +23,11 @@ function renderJsonp(output, cbName, res) {
 }
 
 function renderErrors(errs, res, callbackName) {
-    var errors = {errors: errs.map(function(e) { return e.message; })};
+    var errors = {
+        errors: errs.map(function(e) {
+            return e.message;
+        })
+    };
     res.statusCode = 400;
     if (callbackName) {
         renderJsonp(errors, callbackName, res);
@@ -38,8 +45,8 @@ function render(payload, response, callbackName) {
 }
 
 module.exports = {
-    render: render
-  , renderJson: renderJson
-  , renderJsonp: renderJsonp
-  , renderErrors: renderErrors
+    render: render,
+    renderJson: renderJson,
+    renderJsonp: renderJsonp,
+    renderErrors: renderErrors
 };

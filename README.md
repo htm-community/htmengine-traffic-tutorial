@@ -1,10 +1,10 @@
 This application has two or more parts.
 
-## 1. HTM Engine Python Server
+## 1. [HTM Engine Python Server](python-engine)
 
-This server runs NuPIC within the [HTM Engine](https://github.com/numenta/numenta-apps/tree/master/htmengine). You must follow those installation instructions before this will work. Then you should start the server with supervisord (see the [README](https://github.com/numenta/numenta-apps/tree/master/htmengine)).
+This server runs NuPIC within the [HTM Engine](https://github.com/numenta/numenta-apps/tree/master/htmengine). You must follow those installation instructions before this will work. Then you should start the server with [supervisord](http://supervisord.org/) (see the [README](https://github.com/numenta/numenta-apps/tree/master/htmengine)).
 
-## 2. Node.js Client Application
+## 2. [Node.js Client Application](node-client)
 
 This fetches the data, controls the HTM Engine via HTTP, pipes in mountains of data, displays results in webapp.
 
@@ -69,3 +69,7 @@ This will run at <http://localhost:8083>. You only need to run `npm install` onc
 # Runtime
 
 Immediately after startup, the Node.js client application will start pulling traffic data from [River View](http://data.numenta.org/nyc-traffic/keys.json?includeDetails=1) and pushing it into the HTM Engine. A model is created for every traffic route available. For example, [traffic path "1"](http://data.numenta.org/nyc-traffic/1/meta.html) contains [traffic data](http://data.numenta.org/nyc-traffic/1/data.html) for __"11th ave n ganservoort - 12th ave @ 40th st"__ in Manhattan. This correlates to an HTM Engine model named "1". You can see the raw data for this model by querying the Python HTM Engine HTTP wrapper at <http://localhost:8080/1>. You should see a bunch of text data in the response.
+
+# UI
+
+There are lots of Dygraphs and Google Maps.
