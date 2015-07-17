@@ -8,9 +8,11 @@ This server runs NuPIC within the [HTM Engine](https://github.com/numenta/nument
 
 This fetches the data, controls the HTM Engine via HTTP, pipes in mountains of data, displays results in webapp.
 
-## 3. [River View](http://data.numenta.org) Data Service
+## 3. [River View](http://data.numenta.org) Traffic Data Service
 
 This application is using a data service called [River View](https://github.com/nupic-community/river-view), which is currently running at <http://data.numenta.org>. It provides temporal data within a 6-month window, which includes NYC traffic data.
+
+![HTM Engine Traffic Demo Architecture](images/HTM-Traffic-Architecture.png)
 
 * * *
 
