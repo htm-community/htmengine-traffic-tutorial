@@ -113,7 +113,7 @@ layout: main.hbt
 
 
         if (query.borough) {
-            query.borough = query.borough.replace('%20', ' ')
+            query.borough = query.borough.replace('%20', ' ');
             $('#title h1').html(query.borough);
         } else if (query.id) {
             $('#title h1').html('Route ' + query.id);

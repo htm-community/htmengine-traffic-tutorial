@@ -1,0 +1,117 @@
+---
+title: HTM Engine Traffic Tutorial
+layout: main.hbt
+---
+
+<link href="{{baseurl}}/css/charts.css" rel="stylesheet">
+
+<div id="title">
+    <h2>Daily Traffic Charts</h2>
+    <h3><a href="#">Main Chart</a></h3>
+</div>
+
+<table class="charts">
+    <tbody>
+
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    $(function() {
+
+        // converts query string to json object
+        function getJsonFromUrl() {
+            var query = location.search.substr(1);
+            var result = {};
+            query.split("&").forEach(function(part) {
+                var item = part.split("=");
+                result[item[0]] = decodeURIComponent(item[1]);
+            });
+            return result;
+        }
+
+        function padCsvDataToFillTime(csvData, since, until) {
+            var lines = csvData.trim().split('\n');
+            var header = lines.shift();
+            var sinceInjection = since.format('YYYY/MM/DD HH:mm:ss') + ',,';
+            var untilInjection = until.format('YYYY/MM/DD HH:mm:ss') + ',,';
+            var out = [ header ];
+            out.push(sinceInjection);
+            out = out.concat(lines);
+            out.push(untilInjection);
+            return out.join('\n');
+        }
+
+        function addChart(id, csvData, since, until) {
+
+            var now = moment();
+
+            $('table.charts tbody').append(
+                    "<tr>" +
+                    "<td class='left'>" + now.from(since) +
+                    " until " + now.from(until) + "</td>" +
+                    "<td class='right' id='container-" + id + "'>" +
+                    "<div id='chart-" + id + "'></div></td>" +
+                    "</tr>"
+            );
+
+            return new Dygraph(
+                document.getElementById("chart-" + id), csvData, {
+                    anomaly: {
+                        color: "red",
+                        axis: {
+                            valueRange: [0, 1.0]
+                        }
+                    },
+                    axes: {
+                        y: {
+                            valueRange: [0, 80]
+                        }
+                    },
+                    width: $('#container-' + id).width(),
+                    height: 120
+                }
+            );
+        }
+
+
+        // Program start.
+        var query = getJsonFromUrl();
+        var pathId = query.id;
+
+        moment.tz.setDefault("America/New_York");
+
+        $('#title h3 a').attr('href', '{{baseurl}}/charts/?id=' + pathId);
+
+        // Gets details about this route.
+        $.getJSON('{{ baseurl }}/data/pathDetails', {id: pathId}, function(details) {
+            var graphs = [];
+
+            function chartTheDayBefore(now) {
+                var oneDayAgo = moment(now).subtract(1, 'day');
+                var myQuery = {
+                    since: oneDayAgo.unix(),
+                    until: now.unix()
+                };
+                var csvPath = '/data/' + pathId + '?' + $.param(myQuery);
+
+                $.get(csvPath, {dataType: 'csv'}, function(csvData) {
+                    var chart;
+
+                    if (csvData.trim().split('\n').length > 1) {
+
+                        csvData = padCsvDataToFillTime(csvData, oneDayAgo, now);
+
+                        chart = addChart(graphs.length, csvData, oneDayAgo, now);
+                        graphs.push(chart);
+                        chartTheDayBefore(oneDayAgo);
+                    }
+                });
+
+            }
+
+            chartTheDayBefore(moment());
+        });
+
+    });
+</script>

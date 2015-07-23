@@ -51,23 +51,29 @@ function getPathData(req, res) {
 function getOnePathData(id, query, callback) {
     htmEngineClient.getData(id, function(err, pathData) {
         var filtered;
+        var limit;
         if (err) return callback(err);
-        // Apply time filters
         if (_.keys(query).length) {
+            // Apply time filters
             filtered = _.filter(pathData, function(point) {
-                // console.log(
-                //     '%s\t%s\t%s'
-                //   , moment.tz(query.since*1000, TZ).format()
-                //   , moment.tz(point.timestamp*1000, TZ).format()
-                //   , moment.tz(query.until*1000, TZ).format()
-                // );
-                var match = (
-                (!query.since || point.timestamp > query.since) && (!query.until || point.timestamp <
-                query.until)
-                );
-                // console.log(match);
+                 //console.log(
+                 //    '%s\t%s\t%s'
+                 //  , moment.tz(query.since*1000, TZ).format()
+                 //  , moment.tz(point.timestamp*1000, TZ).format()
+                 //  , moment.tz(query.until*1000, TZ).format()
+                 //);
+                var match = (!query.since || point.timestamp > query.since)
+                         && (!query.until || point.timestamp < query.until);
+                 //console.log(match);
                 return match;
             });
+            // Apply limit
+            if (query.limit) {
+                limit = parseInt(query.limit);
+                //console.log('applying limit %s', limit);
+                // remove all elements after the limit
+                filtered.splice(limit, filtered.length);
+            }
         } else {
             filtered = pathData;
         }
@@ -267,7 +273,7 @@ function init(htmClient, trafficClient, ids, details) {
     htmEngineClient = htmClient;
     trafficDataClient = trafficClient;
     pathIds = ids;
-    pathDetails = details
+    pathDetails = details;
     return {
         getPathData: getPathData,
         getAllAnomalies: getAllAnomalies,
