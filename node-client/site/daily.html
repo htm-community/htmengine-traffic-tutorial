@@ -42,23 +42,22 @@ layout: main.hbt
             return out.join('\n');
         }
 
-        function addChart(id, csvData, since, until) {
-
+        function addChart(id, csvData, details, rowTmpl, since, until) {
             var now = moment();
 
-            $('table.charts tbody').append(
-                    "<tr>" +
-                    "<td class='left'>" + now.from(since) +
-                    " until " + now.from(until) + "</td>" +
-                    "<td class='right' id='container-" + id + "'>" +
-                    "<div id='chart-" + id + "'></div></td>" +
-                    "</tr>"
-            );
+            details.id = pathId;
+            details.chartId = id;
+            details.baseurl = '{{baseurl}}';
+            details.description = since.from(now) + ' to ' + until.from(now);
+            details.until = until;
+
+            $('table.charts tbody').append(Handlebars.compile(rowTmpl)(details));
 
             return new Dygraph(
                 document.getElementById("chart-" + id), csvData, {
                     anomaly: {
                         color: "red",
+                        strokeWidth: 2.0,
                         axis: {
                             valueRange: [0, 1.0]
                         }
@@ -78,40 +77,48 @@ layout: main.hbt
         // Program start.
         var query = getJsonFromUrl();
         var pathId = query.id;
+        var now = moment();
+        if (query.until) {
+            now = moment.unix(query.until);
+        }
 
         moment.tz.setDefault("America/New_York");
 
         $('#title h3 a').attr('href', '{{baseurl}}/charts/?id=' + pathId);
 
-        // Gets details about this route.
-        $.getJSON('{{ baseurl }}/data/pathDetails', {id: pathId}, function(details) {
-            var graphs = [];
+        // Get a row template
+        $.get('{{ baseurl }}/templates/chartRow.hbt', function(rowTmpl) {
+            // Gets details about this route.
+            $.getJSON('{{ baseurl }}/data/pathDetails', {id: pathId}, function(details) {
+                var graphs = [];
 
-            function chartTheDayBefore(now) {
-                var oneDayAgo = moment(now).subtract(1, 'day');
-                var myQuery = {
-                    since: oneDayAgo.unix(),
-                    until: now.unix()
-                };
-                var csvPath = '/data/' + pathId + '?' + $.param(myQuery);
+                function chartTheDayBefore(now) {
+                    var oneDayAgo = moment(now).subtract(1, 'day');
+                    var myQuery = {
+                        since: oneDayAgo.unix(),
+                        until: now.unix()
+                    };
+                    var csvPath = '/data/' + pathId + '?' + $.param(myQuery);
 
-                $.get(csvPath, {dataType: 'csv'}, function(csvData) {
-                    var chart;
+                    $.get(csvPath, {dataType: 'csv'}, function(csvData) {
+                        var chart;
 
-                    if (csvData.trim().split('\n').length > 1) {
+                        if (csvData.trim().split('\n').length > 1) {
 
-                        csvData = padCsvDataToFillTime(csvData, oneDayAgo, now);
+                            csvData = padCsvDataToFillTime(csvData, oneDayAgo, now);
 
-                        chart = addChart(graphs.length, csvData, oneDayAgo, now);
-                        graphs.push(chart);
-                        chartTheDayBefore(oneDayAgo);
-                    }
-                });
+                            chart = addChart(graphs.length, csvData, details, rowTmpl, oneDayAgo, now);
+                            graphs.push(chart);
+                            chartTheDayBefore(oneDayAgo);
+                        }
+                    });
 
-            }
+                }
 
-            chartTheDayBefore(moment());
+                chartTheDayBefore(now);
+            });
         });
+
 
     });
 </script>

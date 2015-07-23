@@ -1,0 +1,20 @@
+<tr>
+    <td class="left">
+        <h4>{{id}}
+            <a href="{{baseurl}}/map?id={{id}}" target="_blank">map</a>
+            {{#if until}}
+                <a href="{{baseurl}}/daily?id={{id}}&until={{until}}" target="_blank">daily</a>
+            {{else}}
+                <a href="{{baseurl}}/daily?id={{id}}" target="_blank">daily</a>
+            {{/if}}
+            ({{Borough}})
+        </h4>
+        {{linkName}}
+        {{#if description}}
+        <p>{{description}}</p>
+        {{/if}}
+    </td>
+    <td class="right" id="container-{{chartId}}">
+        <div id="chart-{{chartId}}"></div>
+    </td>
+</tr>

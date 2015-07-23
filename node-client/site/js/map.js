@@ -353,7 +353,7 @@ $(function() {
         var me = this,
             contextmenuDir, baseurl = this.baseurl,
             map = this.map,
-            searchRadius = (1 / map.getZoom()) * 10000,
+            searchRadius = (1 / map.getZoom()) * 50000,
             nearbyRoutes = [],
             plotLink = baseurl + '/charts/?id=';
 
