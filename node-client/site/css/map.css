@@ -2,7 +2,14 @@
     opacity: 50%;
 }
 
-html, body, #map-canvas { height: 100%; margin: 0; padding: 0;}
+#map-canvas {
+    position: absolute;
+    top: 35px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
 #title {
     position: absolute;
     bottom: 20px;

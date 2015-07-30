@@ -1,14 +1,15 @@
 ---
-title: HTM Engine Traffic Tutorial
+title: Daily Charts
 layout: main.hbt
 ---
 
 <link href="{{baseurl}}/css/charts.css" rel="stylesheet">
 
-<div id="title">
-    <h2>Daily Traffic Charts</h2>
-    <h3><a href="#">Main Chart</a></h3>
-</div>
+<ol class="breadcrumb col-md-12">
+    <li><a href="{{baseurl}}">Home</a></li>
+    <li><a href="" id="all-charts">All Charts</a></li>
+    <li class="active">{{title}}</li>
+</ol>
 
 <table class="charts">
     <tbody>
@@ -84,7 +85,7 @@ layout: main.hbt
 
         moment.tz.setDefault("America/New_York");
 
-        $('#title h3 a').attr('href', '{{baseurl}}/charts/?id=' + pathId);
+        $('#all-charts').attr('href', '{{baseurl}}/charts/?id=' + pathId);
 
         // Get a row template
         $.get('{{ baseurl }}/templates/chartRow.hbt', function(rowTmpl) {

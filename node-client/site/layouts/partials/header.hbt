@@ -36,8 +36,4 @@
   </head>
   <body>
 
-  <!--<div id="absolute-home">-->
-    <!--<a href="{{baseurl}}">HOME</a>-->
-  <!--</div>-->
-
   <div id="main" class="container">
