@@ -11,6 +11,8 @@ layout: main.hbt
     <li class="active" id="this-crumb">{{title}}</li>
 </ol>
 
+<div id="details"></div>
+
 <table class="charts table table-striped">
     <tbody>
     </tbody>
@@ -86,39 +88,47 @@ layout: main.hbt
                         .html('Route ' + pathId + ' Combined Chart');
         $('#this-crumb').html('Route ' + pathId + ' Daily Charts');
 
-        // Get a row template
-        $.get('{{ baseurl }}/templates/dailyChartRow.hbt', function(rowTmpl) {
-            // Gets details about this route.
-            $.getJSON('{{ baseurl }}/data/pathDetails', {id: pathId}, function(details) {
-                var graphs = [];
+        // Get the marker template that we'll use to display route details.
+        $.get('{{ baseurl }}/templates/markerLabel.hbt', function(detailsTmpl) {
+            // Get a row template
+            $.get('{{ baseurl }}/templates/dailyChartRow.hbt', function(rowTmpl) {
+                // Gets details about this route.
+                $.getJSON('{{ baseurl }}/data/pathDetails', {id: pathId}, function(details) {
+                    var graphs = [];
 
-                function chartTheDayBefore(now) {
-                    var oneDayAgo = moment(now).subtract(1, 'day');
-                    var myQuery = {
-                        since: oneDayAgo.unix(),
-                        until: now.unix()
-                    };
-                    var csvPath = '/data/' + pathId + '?' + $.param(myQuery);
+                    $('#details').html(Handlebars.compile(detailsTmpl)({
+                        title: 'Route ' + pathId + ' Daily Charts',
+                        subtitle: details.paths[pathId].borough,
+                        description: details.paths[pathId].linkName
+                    }));
 
-                    $.get(csvPath, {dataType: 'csv'}, function(csvData) {
-                        var chart;
+                    function chartTheDayBefore(now) {
+                        var oneDayAgo = moment(now).subtract(1, 'day');
+                        var myQuery = {
+                            since: oneDayAgo.unix(),
+                            until: now.unix()
+                        };
+                        var csvPath = '/data/' + pathId + '?' + $.param(myQuery);
 
-                        if (csvData.trim().split('\n').length > 1) {
+                        $.get(csvPath, {dataType: 'csv'}, function(csvData) {
+                            var chart;
 
-                            csvData = padCsvDataToFillTime(csvData, oneDayAgo, now);
+                            if (csvData.trim().split('\n').length > 1) {
 
-                            chart = addChart(graphs.length, csvData, details, rowTmpl, oneDayAgo, now);
-                            graphs.push(chart);
-                            chartTheDayBefore(oneDayAgo);
-                        }
-                    });
+                                csvData = padCsvDataToFillTime(csvData, oneDayAgo, now);
 
-                }
+                                chart = addChart(graphs.length, csvData, details, rowTmpl, oneDayAgo, now);
+                                graphs.push(chart);
+                                chartTheDayBefore(oneDayAgo);
+                            }
+                        });
 
-                chartTheDayBefore(now);
+                    }
+
+                    chartTheDayBefore(now);
+                });
             });
         });
-
 
     });
 </script>
