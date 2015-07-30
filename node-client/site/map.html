@@ -15,11 +15,7 @@
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places&key={{ googleMapsApiKey }}">
     </script>
 
-    <script src="{{baseurl}}/js/utils.js"></script>
-    <script src="{{baseurl}}/js/map.js"></script>
-
-
-    <title></title>
+    <title>Traffic Map</title>
 </head>
 
 <body>
@@ -42,10 +38,13 @@
 
 <div id="map-canvas"></div>
 
+<script src="{{baseurl}}/js/utils.js"></script>
+<script src="{{baseurl}}/js/map.js"></script>
+
 <script type="text/javascript">
     $(function() {
 
-        var pageTitle, query = getUrlVars(),
+        var pageTitle, query = getUrlQuery(),
             map;
 
         moment.tz.setDefault('America/New_York');

@@ -46,7 +46,7 @@ function buildStaticFiles(pathDetails, dataSourceUrl, htmEngineServerUrl) {
         .destination(destination)
         .use(templates({
             engine: 'handlebars',
-            pattern: '*.html',
+            pattern: ['js/*.js', '*.html'],
             baseurl: baseurl,
             dataSourceUrl: dataSourceUrl,
             htmEngineServerUrl: htmEngineServerUrl,

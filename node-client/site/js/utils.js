@@ -1,12 +1,13 @@
 
-// Read a page's GET URL variables and return them as an associative array.
-function getUrlVars() {
-    var search = location.search.substring(1),
-        out = {};
-    if (search) {
-        out = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}');
-    }
-    return out;
+// Read a page's GET URL variables and return them as an object.
+function getUrlQuery() {
+    var query = location.search.substr(1);
+    var result = {};
+    query.split("&").forEach(function(part) {
+        var item = part.split("=");
+        result[item[0]] = decodeURIComponent(item[1]);
+    });
+    return result;
 }
 
 /* From http://stackoverflow.com/questions/7128675/from-green-to-red-color-depend-on-percentage */
