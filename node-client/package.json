@@ -1,14 +1,14 @@
 {
   "name": "htmengine-node-client",
   "version": "1.0.0",
-  "description": "",
+  "description": "The client part of an HTM Engine tutorial.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Matthew Taylor",
+  "license": "GPLv3",
   "dependencies": {
     "async": "^1.2.1",
     "express": "^4.13.0",

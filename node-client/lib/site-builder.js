@@ -1,4 +1,7 @@
-
+/* This code builds out static files from the "/site" directory and
+ * puts them into "/build". This includes HTML templates, JavaScript,
+ * CSS, etc. Anything the browser might request.
+ */
 var path = require('path'),
     fs = require('fs-extra'),
     _ = require('lodash'),

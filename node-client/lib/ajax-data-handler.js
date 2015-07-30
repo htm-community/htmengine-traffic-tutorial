@@ -1,10 +1,16 @@
-
+/* This file handles all the AJAX data requests coming from the browser. It only
+ * exports an initializer function, which expects to be passed clients for the
+ * HTM Engine and data server.
+ *
+ * URL routes are not defined in this file, they are all in the index.js.
+ */
 var url = require('url'),
     moment = require('moment-timezone'),
     _ = require('lodash'),
     async = require('async'),
     jsonUtils = require('./json'),
-    DATE_FORMAT = 'YYYY/MM/DD HH:mm:ss', TZ = "America/New_York",
+    DATE_FORMAT = 'YYYY/MM/DD HH:mm:ss',
+    TZ = "America/New_York",
     htmEngineClient,
     trafficDataClient,
     pathIds,

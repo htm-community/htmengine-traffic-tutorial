@@ -1,4 +1,3 @@
-
 var _ = require('lodash'),
     async = require('async'),
     moment = require('moment-timezone'),

@@ -1,4 +1,3 @@
-
 /*
  * JSON HTTP rendering utilities.
  */
