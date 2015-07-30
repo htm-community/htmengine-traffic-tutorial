@@ -6,9 +6,6 @@ table td, table th {
     padding: 0 10px;
 }
 
-#absolute-home {
-    position: absolute;
-    top: 0;
-    left: 0;
-    margin: 6px;
+footer {
+    margin-top: 40px;
 }

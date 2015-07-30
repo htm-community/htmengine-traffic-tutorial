@@ -1,0 +1,73 @@
+---
+title: Route Index
+layout: main.hbt
+---
+
+<ol class="breadcrumb">
+    <li><a href="{{baseurl}}">Home</a></li>
+    <li class="active">{{title}}</li>
+</ol>
+
+<p>Click on the table headers to sort.</p>
+
+<table id="traffic_paths" class="tablesorter table table-striped">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Approximate Address</th>
+        <th>Borough</th>
+        <th>Chart</th>
+        <th>Map</th>
+        <th>CSV</th>
+        <th>HTM Engine Data Output</th>
+        <th>Raw Traffic Data</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#each paths}}
+    <tr>
+        <td>
+            {{this.id}}
+        </td>
+        <td>
+            {{this.linkName}}
+        </td>
+        <td>
+            {{this.Borough}}
+        </td>
+        <td>
+            <a class="btn btn-primary" href="{{ ../baseurl }}/charts/?id={{this.id}}" role="button">
+                <span class="glyphicon glyphicon-signal" aria-hidden="true"></span>
+            </a>
+        </td>
+        <td>
+            <a class="btn btn-primary" href="{{ ../baseurl }}/map?id={{this.id}}" role="button">
+                <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+            </a>
+        </td>
+        <td>
+            <a class="btn btn-primary" href="{{ ../baseurl }}/data/{{this.id}}" role="button">
+                <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+            </a>
+        </td>
+        <td>
+            <a href="{{ ../htmEngineServerUrl }}/{{this.id}}" target="_blank">
+                {{ ../htmEngineServerUrl }}/{{this.id}} ⤤
+            </a>
+        </td>
+        <td>
+            <a href="{{ ../dataSourceUrl }}/{{this.id}}" target="_blank">
+                {{ ../dataSourceUrl }}/{{this.id}} ⤤
+            </a>
+        </td>
+
+    </tr>
+    {{/each}}
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function() {
+        $("#traffic_paths").tablesorter();
+    });
+</script>

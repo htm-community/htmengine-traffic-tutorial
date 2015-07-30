@@ -3,106 +3,45 @@ title: HTM Engine Traffic Tutorial
 layout: main.hbt
 ---
 
-<blockquote>
-    This is the Node.js component of the HTM Engine Traffic Tutorial. It has a web server (you're looking at it right now) that displays anomaly results. It is also a client to an HTM Engine server running in Python.
-</blockquote>
+<ol class="breadcrumb">
+    <li class="active">Home</li>
+</ol>
 
-<h2><a href="{{ ../baseurl }}/map/" taret="_blank">All Traffic Paths Mapped</a></h2>
-<h2><a href="{{ ../baseurl }}/charts/" taret="_blank">All Traffic Paths Charted</a></h2>
-<h2><a href="{{ ../baseurl }}/investigate/" taret="_blank">Search Form</a></h2>
-<h2><a href="{{ ../baseurl }}/time/" taret="_blank">Browse Map Over Time</a></h2>
+<div class="jumbotron">
 
-<h2>Boroughs</h2>
+    <div align="center">
+        <img src="{{baseurl}}/images/hero.jpg" class="img-responsive img-thumbnail" alt="Traffic">
+    </div>
 
-<table>
-<tbody>
-{{#each boroughs}}
-    <tr>
-    <td>
-        {{this}}
-    </td>
-    <td>
-        <a href="{{ ../baseurl }}/map/?borough={{this}}">
-            map
+    <h1>{{title}}</h1>
+
+    <p>This is the Node.js component of the HTM Engine Traffic Tutorial. It has a web server (you're looking at it right now) that displays anomaly results. It is also a client to an HTM Engine server running in Python.</p>
+
+    <div class="btn-group btn-group-lg" role="group" aria-label="...">
+        <a class="btn btn-primary" href="{{ ../baseurl }}/map/" role="button">
+            <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Map All Routes
         </a>
-    </td>
-    <td>
-        <a href="{{ ../baseurl }}/charts/?borough={{this}}">
-            all charts
+        <a class="btn btn-primary" href="{{ ../baseurl }}/investigate/" role="button">
+            <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span> Search For Traffic Anomalies
         </a>
-    </td>
-    </tr>
-{{/each}}
-</tbody>
-</table>
-
-<h2>Traffic Paths</h2>
-
-<p>Click on the table headers to sort.</p>
-
-<table id="traffic_paths" class="tablesorter">
-<thead>
-<tr>
-    <th>ID</th>
-    <th>Approximate Address</th>
-    <th>Borough</th>
-    <th>Data As Of (NYC time)</th>
-    <th>Chart</th>
-    <th>Map</th>
-    <th>CSV</th>
-    <th>HTM Engine Data Output</th>
-    <th>Raw Traffic Data</th>
-</tr>
-</thead>
-<tbody>
-{{#each paths}}
-    <tr>
-    <td>
-            {{this.id}}
-    </td>
-    <td>
-            {{this.linkName}}
-    </td>
-    <td>
-            {{this.Borough}}
-    </td>
-    <td>
-            {{this.datetime}}
-    </td>
-    <td>
-        <a href="{{ ../baseurl }}/charts/?id={{this.id}}">
-            /charts/?id={{this.id}}
+        <a class="btn btn-primary" href="{{ ../baseurl }}/time/" role="button">
+            <span class="glyphicon glyphicon-time" aria-hidden="true"></span> Browse Map Over Time
         </a>
-    </td>
-    <td>
-        <a href="{{ ../baseurl }}/map?id={{this.id}}">
-            /map?id={{this.id}}
-        </a>
-    </td>
-    <td>
-        <a href="{{ ../baseurl }}/data/{{this.id}}">
-            /data/{{this.id}}
-        </a>
-    </td>
-    <td>
-        <a href="{{ ../htmEngineServerUrl }}/{{this.id}}">
-            {{ ../htmEngineServerUrl }}/{{this.id}} ⤤
-        </a>
-    </td>
-    <td>
-        <a href="{{ ../dataSourceUrl }}/{{this.id}}">
-            {{ ../dataSourceUrl }}/{{this.id}} ⤤
-        </a>
-    </td>
+    </div>
 
-    </tr>
-{{/each}}
-</tbody>
-</table>
+    <p>Below, you can view all maps and charts by borough, or all traffic path details and individual route charts.</p>
 
-<script>
-$(document).ready(function() {
-    $("#traffic_paths").tablesorter();
-});
+    <div class="btn-group btn-group-lg" role="group" aria-label="...">
+        <a class="btn btn-primary" href="{{ ../baseurl }}/boroughs/" role="button">
+            <span class="glyphicon glyphicon-home" aria-hidden="true"></span> NYC Boroughs
+        </a>
+        <a class="btn btn-primary" href="{{ ../baseurl }}/paths/" role="button">
+            <span class="glyphicon glyphicon-road" aria-hidden="true"></span> Route Index
+        </a>
+    </div>
 
-</script>
+
+</div>
+
+
+

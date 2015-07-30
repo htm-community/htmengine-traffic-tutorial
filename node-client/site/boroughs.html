@@ -1,0 +1,32 @@
+---
+title: NYC Boroughs
+layout: main.hbt
+---
+
+<ol class="breadcrumb">
+    <li><a href="{{baseurl}}">Home</a></li>
+    <li class="active">{{title}}</li>
+</ol>
+
+<table class="table table-striped">
+    <tbody>
+    {{#each boroughs}}
+    <tr>
+        <td class="">
+            <h4>{{this}}</h4>
+        </td>
+        <td>
+            <div class="btn-group" role="group" aria-label="...">
+                <a class="btn btn-primary" href="{{ ../baseurl }}/map/?borough={{this}}" role="button">
+                    <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Map
+                </a>
+                <a class="btn btn-primary" href="{{ ../baseurl }}/charts/?borough={{this}}" role="button">
+                    <span class="glyphicon glyphicon-signal" aria-hidden="true"></span> Charts
+                </a>
+            </div>
+
+        </td>
+    </tr>
+    {{/each}}
+    </tbody>
+</table>

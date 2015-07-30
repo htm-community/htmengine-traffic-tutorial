@@ -6,7 +6,7 @@ module.exports = {
 
   // This application expects https://github.com/rhyolight/river-view
   // to be running at this URL:
-  riverViewUrl: 'https://river-view.herokuapp.com',
+  riverViewUrl: 'http://data.numenta.org',
   riverName: 'nyc-traffic',
 
   // This applications expects a Python HTTP server around the HTM Engine
