@@ -267,8 +267,7 @@ $(function() {
                 title: 'Route ' + pathId,
                 subtitle: pathData.Borough,
                 description: pathData.linkName,
-                link: me.baseurl + '/charts/?id=' + pathId,
-                linkName: 'chart'
+                id: pathId
             });
 
             infoWindow = new google.maps.InfoWindow({

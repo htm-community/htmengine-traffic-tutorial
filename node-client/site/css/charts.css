@@ -3,7 +3,6 @@ table {
 }
 table td {
     padding: 0 10px;
-    border: solid 1px black;
 }
 table td.left {
     width: 20%;

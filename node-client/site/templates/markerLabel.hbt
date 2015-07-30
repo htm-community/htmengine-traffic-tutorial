@@ -1,6 +1,14 @@
-<h3>{{ title }}</h3>
-<h4>{{ subtitle }}</h4>
+<h3>{{ title }} <small>{{ subtitle }}</small></h3>
+
 <p>{{ description }}</p>
-{{#if link}}
-    <a href="{{ link }}">{{ linkName }}</a>
+
+{{#if id}}
+<div class="btn-group btn-group-sm" role="group" aria-label="...">
+    <a class="btn btn-primary" href="{{ ../baseurl }}/charts/?id={{id}}" role="button">
+        <span class="glyphicon glyphicon-signal" aria-hidden="true"></span> Combined Chart
+    </a>
+    <a class="btn btn-primary" href="{{ ../baseurl }}/daily/?id={{id}}" role="button">
+        <span class="glyphicon glyphicon-time" aria-hidden="true"></span> Daily Charts
+    </a>
+</div>
 {{/if}}

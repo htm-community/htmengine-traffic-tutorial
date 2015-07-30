@@ -8,12 +8,11 @@ layout: main.hbt
 <ol class="breadcrumb col-md-12">
     <li><a href="{{baseurl}}">Home</a></li>
     <li><a href="" id="all-charts">All Charts</a></li>
-    <li class="active">{{title}}</li>
+    <li class="active" id="this-crumb">{{title}}</li>
 </ol>
 
-<table class="charts">
+<table class="charts table table-striped">
     <tbody>
-
     </tbody>
 </table>
 
@@ -46,11 +45,9 @@ layout: main.hbt
         function addChart(id, csvData, details, rowTmpl, since, until) {
             var now = moment();
 
-            details.id = pathId;
             details.chartId = id;
-            details.baseurl = '{{baseurl}}';
-            details.description = since.from(now) + ' to ' + until.from(now);
-            details.until = until;
+            details.since = since.format('ddd DD MMM HH:mm A');
+            details.until = until.format('ddd DD MMM HH:mm A');
 
             $('table.charts tbody').append(Handlebars.compile(rowTmpl)(details));
 
@@ -85,10 +82,12 @@ layout: main.hbt
 
         moment.tz.setDefault("America/New_York");
 
-        $('#all-charts').attr('href', '{{baseurl}}/charts/?id=' + pathId);
+        $('#all-charts').attr('href', '{{baseurl}}/charts/?id=' + pathId)
+                        .html('Route ' + pathId + ' Combined Chart');
+        $('#this-crumb').html('Route ' + pathId + ' Daily Charts');
 
         // Get a row template
-        $.get('{{ baseurl }}/templates/chartRow.hbt', function(rowTmpl) {
+        $.get('{{ baseurl }}/templates/dailyChartRow.hbt', function(rowTmpl) {
             // Gets details about this route.
             $.getJSON('{{ baseurl }}/data/pathDetails', {id: pathId}, function(details) {
                 var graphs = [];

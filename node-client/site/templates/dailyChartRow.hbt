@@ -1,0 +1,24 @@
+<tr>
+    <td class="left">
+
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h4>{{since}}</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-center">
+                to
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h4>{{until}}</h4>
+            </div>
+        </div>
+
+    </td>
+    <td class="right" id="container-{{chartId}}">
+        <div id="chart-{{chartId}}"></div>
+    </td>
+</tr>

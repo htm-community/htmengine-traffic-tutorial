@@ -84,13 +84,11 @@ $(function() {
             ));
         }
 
-
-
         if (query.borough) {
             query.borough = query.borough.replace('%20', ' ');
-            $('#title h1').html(query.borough);
+            $('#this-crumb').html(query.borough + ' Charts');
         } else if (query.id) {
-            $('#title h1').html('Route ' + query.id);
+            $('#this-crumb').html('Route ' + query.id + ' Charts');
         }
 
         $.getJSON('{{ baseurl }}/data/pathDetails', query, function(data) {
