@@ -20,15 +20,22 @@ var path = require('path'),
     interval = config.interval.split(/\s+/),
     maxPaths = config.maxPaths;
 
+if (! process.env['GOOGLE_MAPS_API_KEY']) {
+    console.warn('Expected Google Maps API key to be set into ' +
+                 'environment variable "GOOGLE_MAPS_API_KEY". ' +
+                 'You won\'t be able to see any maps. That\s too bad. :()');
+}
+
 // Convert the interval from strings to momentjs duration.
 interval = moment.duration(parseInt(interval.shift()), interval.shift());
 
 // The thing that interfaces with River View.
 trafficDataClient = new TrafficDataClient(riverViewUrl, riverName);
+
 // The thing that interfaces with the HTM Engine HTTP API.
 htmEngineClient = new HtmEngineClient(htmEngineServerUrl);
 
-// Where the logic of the program actually is.
+// The thing that fetches traffic data and pushes it into HTM Engine.
 trafficPusher = new TrafficPusher({
     trafficDataClient: trafficDataClient,
     htmEngineClient: htmEngineClient
@@ -45,6 +52,8 @@ trafficPusher.init(maxPaths, function(err, pathIds, pathDetails) {
     if (err) throw err;
 
     // The traffic pusher does all the data transfer in the background.
+    // If you comment this line out, the web server will still run, but no new
+    // traffic data will be fetched and pushed to the HTM Engine.
     trafficPusher.start(interval.asMilliseconds());
 
     // Creates all the request handling functions that will be mapped to URL
