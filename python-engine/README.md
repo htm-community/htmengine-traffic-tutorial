@@ -74,4 +74,4 @@ To stop supervisord services, run `supervisorctl stop all`.
 # Continue
 
 The HTM Engine server is now running. You may now continue setup within the
-primary [README](../README.md) of this repository.
+primary [README](../README.md#start-htm-http-server-python) of this repository.
