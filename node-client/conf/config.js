@@ -17,6 +17,6 @@ module.exports = {
   anomalyThreshhold: 0.99,
 
   // This helps for debugging without pulling in the entire dataset.
-  pathWhitelist: [442]
+  pathWhitelist: undefined
 
 };
