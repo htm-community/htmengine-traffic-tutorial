@@ -2,8 +2,14 @@ This HTM Engine application was build from the [Skeleton HTM Engine App](https:/
 
 # Setup
 
-First, this assumes you have a fresh checkout of the `numenta-apps` repository
-from https://github.com/numenta/numenta-apps. Clone that repository, and follow the [HTM Engine README installation instructions](https://github.com/numenta/numenta-apps/tree/master/htmengine) (_requires RabbitMQ and MySQL!_). Then you can install
+## 1. Install and Start Required Services
+
+- [MySQL](https://www.mysql.com/)
+- [RabbitMQ](https://www.rabbitmq.com/)
+
+## 2. Install HTM Engine and NTA Utils
+
+Clone https://github.com/numenta/numenta-apps locally. Then you can install
 `htmengine` in development mode:
 
 ```
@@ -18,7 +24,14 @@ cd numenta-apps/nta.utils
 python setup.py develop --user
 ```
 
-## 1. Create a MySQL database
+## 3. Install Required Python Modules
+
+Now, back in your `htmengine-traffic-tutorial` directory:
+
+    pip install -r python-engine/requirements.txt
+
+
+## 4. Create a MySQL database
 
 For this tutorial, we'll be using a database called `traffic`:
 
@@ -26,35 +39,34 @@ For this tutorial, we'll be using a database called `traffic`:
 mysql -u root --execute="CREATE DATABASE traffic"
 ```
 
-## 2. Set APPLICATION_CONFIG_PATH in your environment
+## 5. Apply database migrations
 
-`APPLICATION_CONFIG_PATH` must be set, and include the path to the config files
-in the `conf/` directory.  For example, if you're in the the `python-engine`
-directory:
+This will set up the `traffic` database by creating the appropriate table schema for the application.
 
-```
-export APPLICATION_CONFIG_PATH=`pwd`/conf
-```
-
-## 4. Apply database migrations
-
-Again, from the `python-engine` directory:
+Again, from the `htmengine-traffic-tutorial` directory:
 
 ```
-python repository/migrate.py
+python python-engine/repository/migrate.py
 ```
 
-## 5. Start services with supervisor
+## 6. Set `APPLICATION_CONFIG_PATH` in your environment
 
-Again, from the `python-engine` directory:
+The `APPLICATION_CONFIG_PATH` environment variable must be set, and point to the `htmengine-traffic-tutorial/python-engine/conf/` directory.  For example, if you're in the the `htmengine-traffic-tutorial` directory:
 
 ```
-mkdir -p logs
-supervisord -c conf/supervisord.conf
+export APPLICATION_CONFIG_PATH=`pwd`/python-engine/conf
 ```
 
-At this point, the core `htmengine` services are running.  You can see the
-supervisor status at <http://localhost:9001/> or by running
+## 7. Start services with supervisor
+
+Again, from the `htmengine-traffic-tutorial` directory:
+
+```
+mkdir python-engine/logs
+supervisord -c python-engine/conf/supervisord.conf
+```
+
+At this point, the core `htmengine` services are running.  You can see the supervisor status at <http://localhost:9001/> or by running
 `supervisorctl status`.
 
 To stop supervisord services, run `supervisorctl stop all`.

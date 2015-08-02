@@ -42,36 +42,32 @@ Also, if you want to view the map of all the traffic paths (at `http://localhost
 
 Start the following services appropriately for your environment:
 
-- MySQL
-- RabbitMQ
+- [MySQL](https://www.mysql.com/)
+- [RabbitMQ](https://www.rabbitmq.com/)
 
-## HTM Engine (Python)
+## Install and Start HTM Engine (Python)
 
-Be sure to install requirements.
+Read and follow [`python-engine/README.md`](python-engine/README.md), then continue with the directions below.
 
-    pip install -r python-engine/requirements.txt
+## Start HTM HTTP Server (Python)
 
-Start supervisord from the `python-engine` folder.
-
-    cd python-engine
-    supervisord -c conf/supervisord.conf
-
-## HTM HTTP Server (Python)
-
-Provides a simple `GET`/`POST`/`PUT` HTTP interface on top of the HTM Engine.
+This provides a simple `GET`/`POST`/`PUT` HTTP interface on top of the HTM Engine, which is really useful if you don't want to write your HTM application in python. HTM services must be running in supervisor for this HTTP interface to work properly.
 
     cd python-engine
     python webapp.py
 
 This will run at <http://localhost:8080>.
 
-## HTM Client (JavaScript)
+## Install HTM Client (JavaScript)
 
     cd node-client
     npm install .
+
+## Start HTM Client (JavaScript)
+
     npm start
 
-This will run at <http://localhost:8083>. You only need to run `npm install` once.
+This will run at <http://localhost:8083>.
 
 * * *
 
