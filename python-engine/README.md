@@ -31,7 +31,15 @@ Now, back in your `htmengine-traffic-tutorial` directory:
     pip install -r python-engine/requirements.txt
 
 
-## 4. Create a MySQL database
+## 4. Set `APPLICATION_CONFIG_PATH` in your environment
+
+The `APPLICATION_CONFIG_PATH` environment variable must be set, and point to the `htmengine-traffic-tutorial/python-engine/conf/` directory.  For example, if you're in the the `htmengine-traffic-tutorial` directory:
+
+```
+export APPLICATION_CONFIG_PATH=`pwd`/python-engine/conf
+```
+
+## 5. Create a MySQL database
 
 For this tutorial, we'll be using a database called `traffic`:
 
@@ -39,7 +47,7 @@ For this tutorial, we'll be using a database called `traffic`:
 mysql -u root --execute="CREATE DATABASE traffic"
 ```
 
-## 5. Apply database migrations
+## 6. Apply database migrations
 
 This will set up the `traffic` database by creating the appropriate table schema for the application.
 
@@ -49,21 +57,14 @@ Again, from the `htmengine-traffic-tutorial` directory:
 python python-engine/repository/migrate.py
 ```
 
-## 6. Set `APPLICATION_CONFIG_PATH` in your environment
-
-The `APPLICATION_CONFIG_PATH` environment variable must be set, and point to the `htmengine-traffic-tutorial/python-engine/conf/` directory.  For example, if you're in the the `htmengine-traffic-tutorial` directory:
-
-```
-export APPLICATION_CONFIG_PATH=`pwd`/python-engine/conf
-```
-
 ## 7. Start services with supervisor
 
-Again, from the `htmengine-traffic-tutorial` directory:
+Thsi time, you must be in the `htmengine-traffic-tutorial/python-engine` directory:
 
 ```
-mkdir python-engine/logs
-supervisord -c python-engine/conf/supervisord.conf
+cd python-engine
+mkdir logs
+supervisord -c conf/supervisord.conf
 ```
 
 At this point, the core `htmengine` services are running.  You can see the supervisor status at <http://localhost:9001/> or by running
