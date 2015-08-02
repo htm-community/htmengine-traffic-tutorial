@@ -38,6 +38,13 @@ Also, if you want to view the map of all the traffic paths (at `http://localhost
 
 # Startup
 
+## Start Services
+
+Start the following services appropriately for your environment:
+
+- MySQL
+- RabbitMQ
+
 ## HTM Engine (Python)
 
 Be sure to install requirements.
