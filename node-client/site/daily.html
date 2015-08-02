@@ -19,6 +19,7 @@ layout: main.hbt
 </table>
 
 <script type="text/javascript">
+
     $(function() {
 
         // converts query string to json object
@@ -75,14 +76,15 @@ layout: main.hbt
 
 
         // Program start.
+
+        moment.tz.setDefault("America/New_York");
+
         var query = getJsonFromUrl();
         var pathId = query.id;
         var now = moment();
         if (query.until) {
             now = moment.unix(query.until);
         }
-
-        moment.tz.setDefault("America/New_York");
 
         $('#all-charts').attr('href', '{{baseurl}}/charts/?id=' + pathId)
                         .html('Route ' + pathId + ' Combined Chart');

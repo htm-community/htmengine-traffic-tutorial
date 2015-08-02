@@ -57,20 +57,19 @@ function TrafficPusher(config) {
 
 /**
  * Do this first thing.
- * @param maxPaths [integer] How many traffic paths to pull (if 0, will pull
- *                 all)
+ * @param pathWhitelist [array] only pull these paths, if specified
  * @param callback [function] Called with (error, list of path ids, path
  *                 details object)
  */
-TrafficPusher.prototype.init = function(maxPaths, callback) {
+TrafficPusher.prototype.init = function(pathWhitelist, callback) {
     var me = this;
     me.trafficDataClient.getPaths(function(err, pathDetails) {
         if (err) return callback(err);
         me.pathDetails = pathDetails;
         me.pathIds = _.keys(pathDetails.keys);
         // For debugging with fewer than all the paths
-        if (maxPaths) {
-            me.pathIds = me.pathIds.slice(0, maxPaths);
+        if (pathWhitelist) {
+            me.pathIds = pathWhitelist;
         }
         callback(null, me.pathIds, pathDetails.keys);
     });

@@ -16,8 +16,7 @@ module.exports = {
   interval: '10 minutes',
   anomalyThreshhold: 0.99,
 
-  // How many traffic paths to pull. This helps for debugging without pulling
-  // in the entire dataset. If "0", this is disregarded.
-  maxPaths: 0
+  // This helps for debugging without pulling in the entire dataset.
+  pathWhitelist: [442]
 
 };

@@ -18,7 +18,7 @@ var path = require('path'),
     trafficPusher,
     app = express(),
     interval = config.interval.split(/\s+/),
-    maxPaths = config.maxPaths;
+    pathWhitelist = config.pathWhitelist;
 
 if (! process.env['GOOGLE_MAPS_API_KEY']) {
     console.warn('Expected Google Maps API key to be set into ' +
@@ -43,7 +43,7 @@ trafficPusher = new TrafficPusher({
 
 // The TrafficPusher must be initialized so it can gather all the traffic paths
 // it will be monitoring. Returns all the path ids and details to the callback.
-trafficPusher.init(maxPaths, function(err, pathIds, pathDetails) {
+trafficPusher.init(pathWhitelist, function(err, pathIds, pathDetails) {
     // This will be a list of all path data available at startup, including all
     // additional information we might want to add to them for local static
     // templates.
