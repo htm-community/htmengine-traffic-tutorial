@@ -24,26 +24,19 @@ This project started with a fork of the [skeleton-htmengine-app](https://github.
 
 # Requires:
 
-- [supervisord](http://supervisord.org/)
 - [HTM Engine](https://github.com/numenta/numenta-apps/tree/master/htmengine), which also needs:
   - [NTA Utils](https://github.com/numenta/numenta-apps/tree/master/nta.utils)
+  - [Supervisor](http://supervisord.org/)
   - [MySQL](https://www.mysql.com/)
   - [RabbitMQ](https://www.rabbitmq.com/)
 ( just do it )
-- [Node.js](https://nodejs.org) & [NPM](http://npmjs.org) (hopefully it came with it)
+- [Node.js](https://nodejs.org)
 
 Also, if you want to view the map of all the traffic paths (at `http://localhost:8083/map`) you'll need a [Google Maps API key](https://developers.google.com/maps/).
 
     export GOOGLE_MAPS_API_KEY=<your key>
 
 # Startup
-
-## Start Services
-
-Start the following services appropriately for your environment:
-
-- [MySQL](https://www.mysql.com/)
-- [RabbitMQ](https://www.rabbitmq.com/)
 
 ## Install and Start HTM Engine (Python)
 

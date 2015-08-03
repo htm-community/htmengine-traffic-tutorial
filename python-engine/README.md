@@ -4,8 +4,13 @@ This HTM Engine application was build from the [Skeleton HTM Engine App](https:/
 
 ## 1. Install and Start Required Services
 
+Install the following services appropriately for your environment:
+
 - [MySQL](https://www.mysql.com/)
 - [RabbitMQ](https://www.rabbitmq.com/)
+- [Supervisor](http://supervisord.org/)
+
+Go ahead and start the MySQL server and RabbitMQ, but not Supervisor.
 
 ## 2. Install HTM Engine and NTA Utils
 
