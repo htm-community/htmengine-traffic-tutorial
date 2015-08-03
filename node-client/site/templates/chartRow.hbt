@@ -1,4 +1,4 @@
-<tr>
+<tr id="chart-{{chartId}}-row">
     <td class="left">
 
         <div class="row">
@@ -16,15 +16,20 @@
                     <a class="btn btn-primary" href="{{baseurl}}/map?id={{id}}" role="button">
                         <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Map
                     </a>
+
                     {{#if until}}
                     <a class="btn btn-primary" href="{{baseurl}}/daily?id={{id}}&until={{until}}" role="button">
-                        <span class="glyphicon glyphicon-signal" aria-hidden="true"></span> Daily Chart
+                        <span class="glyphicon glyphicon-signal" aria-hidden="true"></span> Daily
                     </a>
                     {{else}}
                     <a class="btn btn-primary" href="{{baseurl}}/daily?id={{id}}" role="button">
-                        <span class="glyphicon glyphicon-signal" aria-hidden="true"></span> Daily Chart
+                        <span class="glyphicon glyphicon-signal" aria-hidden="true"></span> Daily
                     </a>
                     {{/if}}
+
+                    <a class="btn btn-primary hide-chart" href="#" role="button" data-chart="{{chartId}}">
+                        <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hide
+                    </a>
 
                 </div>
 

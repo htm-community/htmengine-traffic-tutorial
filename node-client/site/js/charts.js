@@ -99,6 +99,10 @@ $(function() {
                 selection: false,
                 zoom: true
             });
+            $('.hide-chart').click(function(event) {
+                var id = $(event.target).data('chart');
+                $('#chart-' + id + '-row').hide();
+            });
         });
 
     });
