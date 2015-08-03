@@ -56,8 +56,11 @@ Again, from the `htmengine-traffic-tutorial` directory:
 ```
 python python-engine/repository/migrate.py
 ```
+## 7. Update Supervisor Config
 
-## 7. Start services with supervisor
+In `python-engine/conf/supervisor.conf`, there are two places where abolute paths need to be updated. Look for the string `/Users/mtaylor/nta/` and replace with your local path to your `htmeengine-traffic-tutorial` checkout.
+
+## 8. Start services with supervisor
 
 Thsi time, you must be in the `htmengine-traffic-tutorial/python-engine` directory:
 
