@@ -23,7 +23,7 @@ var path = require('path'),
 if (! process.env['GOOGLE_MAPS_API_KEY']) {
     console.warn('Expected Google Maps API key to be set into ' +
                  'environment variable "GOOGLE_MAPS_API_KEY". ' +
-                 'You won\'t be able to see any maps. That\s too bad. :()');
+                 'You won\'t be able to see any maps. That\'s too bad. :( )');
 }
 
 // Convert the interval from strings to momentjs duration.
