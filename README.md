@@ -1,3 +1,9 @@
+> This source code is accompanied by a [tutorial screencast](https://www.youtube.com/watch?v=lzJd_a6y6-E).
+
+[![YouTube Screenshot of HTM Engine Tutorial](http://img.youtube.com/vi/lzJd_a6y6-E/hqdefault.jpg)](https://www.youtube.com/watch?v=lzJd_a6y6-E)
+
+* * *
+
 This application has two or more parts.
 
 ## 1. [HTM Engine Python Server](python-engine)
