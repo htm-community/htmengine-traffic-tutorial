@@ -65,7 +65,7 @@ python python-engine/repository/migrate.py
 ```
 ## 7. Update Two Config Files
 
-In `python-engine/conf/supervisor.conf`, there are two places where asbolute paths need to be updated. Look for the string `/Users/mtaylor/nta/` and replace with your local path to your `htmeengine-traffic-tutorial` checkout.
+In `python-engine/conf/supervisord.conf`, there are two places where asbolute paths need to be updated. Look for the string `/Users/mtaylor/nta/` and replace with your local path to your `htmeengine-traffic-tutorial` checkout.
 
 In `python-engine/conf/model-checkpoint.conf`, update the `storage.root` value to point to a directory within your own file system. If this folder does not exist, it will be created.
 
