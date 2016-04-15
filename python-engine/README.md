@@ -1,4 +1,4 @@
-This HTM Engine application was build from the [Skeleton HTM Engine App](https://github.com/nupic-community/skeleton-htmengine-app). It is like a scaffolding with an HTM Engine ready to run after a few configuration changes. It is _**the**_ place to start if you want to create a new HTM Engine application. See its README for more details.
+This HTM Engine application was built from the [Skeleton HTM Engine App](https://github.com/nupic-community/skeleton-htmengine-app). It is like a scaffolding with an HTM Engine ready to run after a few configuration changes. It is _**the**_ place to start if you want to create a new HTM Engine application. See its README for more details.
 
 # Setup
 
@@ -65,13 +65,13 @@ python python-engine/repository/migrate.py
 ```
 ## 7. Update Two Config Files
 
-In `python-engine/conf/supervisord.conf`, there are two places where asbolute paths need to be updated. Look for the string `/Users/mtaylor/nta/` and replace with your local path to your `htmeengine-traffic-tutorial` checkout.
+In `python-engine/conf/supervisord.conf`, there are two places where absolute paths need to be updated. Look for the string `/Users/mtaylor/nta/` and replace with your local path to your `htmeengine-traffic-tutorial` checkout.
 
 In `python-engine/conf/model-checkpoint.conf`, update the `storage.root` value to point to a directory within your own file system. If this folder does not exist, it will be created.
 
 ## 8. Start services with supervisor
 
-Thsi time, you must be in the `htmengine-traffic-tutorial/python-engine` directory:
+This time, you must be in the `htmengine-traffic-tutorial/python-engine` directory:
 
 ```
 cd python-engine
