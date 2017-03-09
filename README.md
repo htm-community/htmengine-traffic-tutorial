@@ -3,6 +3,8 @@
 [![YouTube Screenshot of HTM Engine Tutorial](http://img.youtube.com/vi/lzJd_a6y6-E/hqdefault.jpg)](https://www.youtube.com/watch?v=lzJd_a6y6-E)
 
 * * *
+> _**WARNING**_: [This project is currently broken because of an issue with the River View data service.](https://discourse.numenta.org/t/river-view-problems/1778)
+* * *
 
 This application has two or more parts.
 
